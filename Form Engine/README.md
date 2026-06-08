@@ -240,7 +240,7 @@ The console will show `[CFE]` prefixed messages: which rules fired, condition re
 | File | Description |
 |---|---|
 | `solution/ConfigurableFormEngine_unmanaged.zip` | Import this into your environment |
-| `webresources/mab_formengine.min.js` | The minified web resource (already inside the solution zip) |
+| `webresources/mab_formengine.js` | The web resource JavaScript (already inside the solution zip) |
 | `README.md` | This file |
 
 ---
