@@ -1,55 +1,40 @@
 # Configurable Form Engine (CFE)
 
-**Author:** Abdul Basit  
-**Publisher prefix:** `mab`  
-**Solution:** `ConfigurableFormEngine`  
-**Target:** Model-driven apps on Microsoft Dataverse / Dynamics 365
+**Author:** Abdul Basit · **Publisher prefix:** `mab`  
+**Platform:** Microsoft Dynamics 365 / Power Platform (Model-driven apps)
+
+> Stop writing JavaScript for every form. Configure field behaviour from data.
 
 ---
 
-## What it is
+## What it does
 
-A **single generic JavaScript web resource** that drives model-driven app form behaviour entirely from Dataverse configuration tables. Register it once on any form's OnLoad event — no per-table JavaScript ever again.
+A single web resource that drives model-driven app form behaviour entirely from Dataverse configuration records. Register it once on a form's OnLoad event — then control field visibility, requirement, editability, default values, and value locking from data, not code.
 
-**Controls (v1):**
-- Field, tab, and section **visibility** (show / hide)
-- Field **requirement** (required / optional)
-- Field **editability** (read-only / editable)
-- Field **default values** (static, Today, Current User, Lookup)
-- Field **value locking** (lock when set / lock after save)
-- All of the above **conditionally** — re-evaluated on OnChange of driver fields
+**No per-table JavaScript. No republishing. Just data.**
 
 ---
 
 ## Quick start
 
-1. Import [`Form Engine/solution/ConfigurableFormEngine_unmanaged.zip`](Form%20Engine/solution/ConfigurableFormEngine_unmanaged.zip) into your environment
-2. Register the OnLoad handler on any form:
-   ```
-   Library : mab_formengine.js
-   Function: MAB.FormEngine.onLoad
-   ✅ Pass execution context as first parameter
-   ```
-3. Configure behaviour from data — see the [full README](Form%20Engine/README.md)
+1. **Download** [`Form Engine/solution/ConfigurableFormEngine_unmanaged.zip`](Form%20Engine/solution/ConfigurableFormEngine_unmanaged.zip)
+2. **Import** it into your Dynamics 365 / Power Platform environment
+3. **Register** the OnLoad handler on any form:
+   - Library: `mab_formengine`
+   - Function: `MAB.FormEngine.onLoad`
+   - ✅ Pass execution context as first parameter
+4. **Configure** behaviour from the 4 `mab_` tables — see the [full documentation](Form%20Engine/README.md)
 
 ---
 
-## Repository structure
+## Full documentation
 
-```
-Form Engine/
-├── webresources/
-│   ├── mab_formengine.js         ← full source
-│   └── mab_formengine.min.js     ← minified (production)
-├── solution/
-│   ├── ConfigurableFormEngine_unmanaged.zip   ← import this
-│   └── unpack/                   ← solution XML for source control / ALM
-├── README.md                     ← full documentation
-└── Design - Configurable Form Engine (CFE).md ← design spec
-```
+See **[Form Engine/README.md](Form%20Engine/README.md)** for:
+- All configuration tables and fields
+- Step-by-step onboarding guide
+- Common rule examples (hide, required, defaults, locking)
+- Debugging and cache clearing
 
 ---
 
-## License
-
-MIT — free to use, modify, and distribute with attribution to **Abdul Basit**.
+*Author: Abdul Basit — free to use and redistribute.*
