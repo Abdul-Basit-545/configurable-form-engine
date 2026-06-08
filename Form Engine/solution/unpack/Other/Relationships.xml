@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<EntityRelationships xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <EntityRelationship Name="business_unit_mab_formrule" />
+  <EntityRelationship Name="business_unit_mab_formrulecondition" />
+  <EntityRelationship Name="business_unit_mab_managedform" />
+  <EntityRelationship Name="business_unit_mab_managedtable" />
+  <EntityRelationship Name="lk_mab_formrule_createdby" />
+  <EntityRelationship Name="lk_mab_formrule_modifiedby" />
+  <EntityRelationship Name="lk_mab_formrulecondition_createdby" />
+  <EntityRelationship Name="lk_mab_formrulecondition_modifiedby" />
+  <EntityRelationship Name="lk_mab_managedform_createdby" />
+  <EntityRelationship Name="lk_mab_managedform_modifiedby" />
+  <EntityRelationship Name="lk_mab_managedtable_createdby" />
+  <EntityRelationship Name="lk_mab_managedtable_modifiedby" />
+  <EntityRelationship Name="mab_formrule_formrulecondition" />
+  <EntityRelationship Name="mab_managedform_formrule" />
+  <EntityRelationship Name="mab_managedtable_formrule" />
+  <EntityRelationship Name="mab_managedtable_managedform" />
+  <EntityRelationship Name="owner_mab_formrule" />
+  <EntityRelationship Name="owner_mab_formrulecondition" />
+  <EntityRelationship Name="owner_mab_managedform" />
+  <EntityRelationship Name="owner_mab_managedtable" />
+  <EntityRelationship Name="team_mab_formrule" />
+  <EntityRelationship Name="team_mab_formrulecondition" />
+  <EntityRelationship Name="team_mab_managedform" />
+  <EntityRelationship Name="team_mab_managedtable" />
+  <EntityRelationship Name="user_mab_formrule" />
+  <EntityRelationship Name="user_mab_formrulecondition" />
+  <EntityRelationship Name="user_mab_managedform" />
+  <EntityRelationship Name="user_mab_managedtable" />
+</EntityRelationships>
