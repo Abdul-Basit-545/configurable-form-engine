@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: List Rules
   description: Lists all CFE form rules for a managed table.
 kind: AdaptiveDialog
+modelDescription: Lists all CFE form rules registered for a managed table, including each rule's ID (needed for adding conditions, validation, roles, enable/disable and delete).
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -25,8 +26,120 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanTableName
+      variable: init:Topic.CleanTableName
+      value: =Lower(Trim(Topic.TableName))
+
+    - kind: InvokeConnectorAction
+      id: lookupTable
+      displayName: Look up the managed table record
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_managedtables
+          "$select": mab_managedtableid,mab_name
+          "$filter": ="mab_name eq '" & Topic.CleanTableName & "'"
+          "$top": 1
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_managedtableid:
+                  type: String
+                mab_name:
+                  type: String
+      output:
+        binding:
+          value: Topic.TableRows
+
+    - kind: ConditionGroup
+      id: checkTableFound
+      conditions:
+        - id: tableNotFound
+          condition: =CountRows(Topic.TableRows) = 0
+          actions:
+            - kind: SendActivity
+              id: sendTableNotFound
+              activity:
+                text:
+                  - "Table **{Topic.CleanTableName}** is not registered in the CFE, so it has no rules. Say **register a table** to onboard it."
+            - kind: EndDialog
+              id: endTableNotFound
+
+    - kind: SetVariable
+      id: setTableGuid
+      variable: init:Topic.TableGuid
+      value: =First(Topic.TableRows).mab_managedtableid
+
+    - kind: InvokeConnectorAction
+      id: listRules
+      displayName: List form rules for the table
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_formrules
+          "$select": mab_formruleid,mab_name,mab_elementtype,mab_elementname,mab_priority,mab_active
+          "$filter": ="_mab_managedtableid_value eq " & Topic.TableGuid
+          "$orderby": mab_priority asc
+          "$top": 50
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_formruleid:
+                  type: String
+                mab_name:
+                  type: String
+                mab_elementtype:
+                  type: Number
+                mab_elementname:
+                  type: String
+                mab_priority:
+                  type: Number
+                mab_active:
+                  type: Boolean
+      output:
+        binding:
+          value: Topic.Rules
+
+    - kind: ConditionGroup
+      id: checkRulesFound
+      conditions:
+        - id: noRules
+          condition: =CountRows(Topic.Rules) = 0
+          actions:
+            - kind: SendActivity
+              id: sendNoRules
+              activity:
+                text:
+                  - "Table **{Topic.CleanTableName}** has no rules yet. Say **create a rule** to add one."
+            - kind: EndDialog
+              id: endNoRules
+
+    - kind: SetVariable
+      id: setRulesText
+      variable: init:Topic.RulesText
+      value: "=Concat(Topic.Rules, \"• **\" & mab_name & \"** — \" & Switch(mab_elementtype, 734000000, \"Field\", 734000001, \"Tab\", 734000002, \"Section\", 734000003, \"Form\", \"Element\") & \" `\" & mab_elementname & \"` | priority \" & Text(mab_priority) & \" | \" & If(mab_active, \"🟢 active\", \"⚪ inactive\") & \" | ID: `\" & mab_formruleid & \"`\" & Char(10))"
+
     - kind: SendActivity
-      id: fetching
+      id: sendRules
       activity:
         text:
-          - "Looking up rules for table **{Topic.TableName}**..."
+          - "Here are the rules for **{Topic.CleanTableName}** (priority order):\n\n{Topic.RulesText}\nUse a Rule ID to **add a condition**, **set a default**, **add validation**, **assign a role**, **enable/disable**, or **delete** a rule."

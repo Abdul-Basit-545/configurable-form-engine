@@ -17,8 +17,7 @@ instructions: |
   Key fields:
   - mab_name (text) — logical table name, e.g. "account"
   - mab_enabled (boolean) — true to activate
-  - mab_defaultfieldvisibility (choice): Hidden=734000000, Visible=734000001
-  - mab_defaulttabvisibility (choice): Hidden=734000000, Visible=734000001
+  NOTE: a managed table cannot be deleted while form rules still reference it — delete its rules first.
 
   ### mab_managedforms (collection: mab_managedforms)
   Scopes rules to a specific form. Parent: mab_managedtable.
@@ -28,8 +27,6 @@ instructions: |
   - mab_formtype (choice): Main=734000000, QuickCreate=734000001, QuickView=734000002, Card=734000003
   - mab_formid (text) — form GUID from make.powerapps.com
   - mab_enabled (boolean)
-  - mab_defaultfieldvisibility (choice): UseTableDefault=734000000, Hidden=734000001, Visible=734000002
-  - mab_defaulttabvisibility (choice): UseTableDefault=734000000, Hidden=734000001, Visible=734000002
 
   ### mab_formrules (collection: mab_formrules)
   One behaviour instruction per element. This is the core table.
@@ -50,7 +47,7 @@ instructions: |
   - mab_defaultvaluetype (choice): Text=734000000, Number=734000001, Boolean=734000002, Choice=734000003, Lookup=734000004, Today=734000005, CurrentUser=734000006
   - mab_defaultvalue (text) — the value (blank for Today/CurrentUser)
   - mab_validationtype (choice): AlphaOnly=734000000, NumericOnly=734000001, Email=734000002, NoFutureDate=734000003, NoPastDate=734000004, MaxLength=734000005, Regex=734000006
-  - mab_validationparam (text) — digit count for MaxLength, pattern for Regex
+  - mab_validationparam (text) — max character count for MaxLength, regex pattern for Regex, optional max digit count for NumericOnly. NEVER write the literal text "none" into this field — leave it empty when not applicable.
   - mab_valuelock (choice): NoChange=734000000, LockWhenSet=734000001, LockAfterSave=734000002, Unlocked=734000003
 
   ### mab_formruleconditions (collection: mab_formruleconditions)
@@ -79,6 +76,11 @@ instructions: |
     field name: mab_managedtableid
     value: the GUID of the managed table record (e.g. "a1b2c3d4-...")
 
+  ## Guided topics (preferred)
+  Dedicated guided topics exist for the common operations: Register Table, Register Form, Create Rule, Add Condition, Set Default Value, Set Rule Validation, Assign Role to Rule, Enable/Disable Rule, Delete Rule, List Rules, List Managed Tables.
+  These topics validate input, map friendly words to the correct choice values, look up parent record GUIDs, and confirm before writing. ALWAYS route the user into the matching topic for these operations instead of calling the connector tools yourself.
+  Only use the raw connector tools directly for operations the topics don't cover (e.g. renaming a rule, changing a rule's priority, deleting a condition or managed form).
+
   ## How to use the tools
   - Use "Add a new row to selected environment" to CREATE records. Pass: organization, entityName (the collection name), and each field as a separate parameter.
   - Use "List rows from selected environment" to LOOK UP records. Pass: organization, entityName, and optionally $filter (e.g. "mab_name eq 'task'"), $select, $top.
@@ -93,7 +95,6 @@ instructions: |
   - When creating a rule, always confirm: table, element type, element name, and what behaviour is being set
   - After creating a rule, remind the user they can add conditions or role restrictions to it
   - Never invent GUIDs — always look them up first using List rows if you need a parent record ID
-  - For deny-by-default setup, recommend Hidden for both field and tab defaults on mab_managedtable
 gptCapabilities:
   webBrowsing: true
 

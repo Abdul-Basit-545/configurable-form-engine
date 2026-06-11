@@ -1,7 +1,8 @@
 mcs.metadata:
   componentName: Create Rule
-  description: Guided wizard to create a CFE form rule — visibility, requirement, editability, default value, value lock, or form-level lock.
+  description: Guided wizard to create a CFE form rule — visibility, requirement, editability, or form-level lock.
 kind: AdaptiveDialog
+modelDescription: Creates a CFE form rule (mab_formrule record) controlling visibility, requirement or editability of a field, tab, section or the whole form. Use when the user wants to create a rule, hide/show a field, make a field required/optional, or lock something.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -29,6 +30,60 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanTableName
+      variable: init:Topic.CleanTableName
+      value: =Lower(Trim(Topic.TableName))
+
+    - kind: InvokeConnectorAction
+      id: lookupTable
+      displayName: Look up the managed table record
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_managedtables
+          "$select": mab_managedtableid,mab_name
+          "$filter": ="mab_name eq '" & Topic.CleanTableName & "'"
+          "$top": 1
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_managedtableid:
+                  type: String
+                mab_name:
+                  type: String
+      output:
+        binding:
+          value: Topic.TableRows
+
+    - kind: ConditionGroup
+      id: checkTableFound
+      conditions:
+        - id: tableNotFound
+          condition: =CountRows(Topic.TableRows) = 0
+          actions:
+            - kind: SendActivity
+              id: sendTableNotFound
+              activity:
+                text:
+                  - "I couldn't find a managed table named **{Topic.CleanTableName}** in the CFE. Please **register the table** first, then create the rule."
+            - kind: EndDialog
+              id: endTableNotFound
+
+    - kind: SetVariable
+      id: setTableGuid
+      variable: init:Topic.TableGuid
+      value: =First(Topic.TableRows).mab_managedtableid
+
     - kind: Question
       id: askRuleName
       variable: init:Topic.RuleName
@@ -47,10 +102,15 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setElementTypeValue
+      variable: init:Topic.ElementTypeValue
+      value: '=Switch(Lower(Trim(Topic.ElementType)), "field", 734000000, "tab", 734000001, "section", 734000002, "form", 734000003, 734000000)'
+
     - kind: Question
       id: askElementName
       variable: init:Topic.ElementName
-      prompt: What is the **logical name** of the {Topic.ElementType}? (e.g. `creditlimit`, `tab_financial`, `section_details`)
+      prompt: What is the **logical name** of the {Topic.ElementType}? (e.g. `creditlimit`, `tab_financial`, `section_details`. For the whole form, type `form`.)
       entity: StringPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
@@ -65,6 +125,11 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setVisibilityValue
+      variable: init:Topic.VisibilityValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.Visibility)), " ", ""), "show", 734000001, "hide", 734000002, 734000000)'
+
     - kind: Question
       id: askRequirement
       variable: init:Topic.Requirement
@@ -73,6 +138,11 @@ beginDialog:
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: SetVariable
+      id: setRequirementValue
+      variable: init:Topic.RequirementValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.Requirement)), " ", ""), "required", 734000001, "optional", 734000002, 734000000)'
 
     - kind: Question
       id: askEditability
@@ -83,6 +153,11 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setEditabilityValue
+      variable: init:Topic.EditabilityValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.Editability)), " ", ""), "editable", 734000001, "readonly", 734000002, "read-only", 734000002, 734000000)'
+
     - kind: Question
       id: askAppliesOn
       variable: init:Topic.AppliesOn
@@ -91,6 +166,11 @@ beginDialog:
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: SetVariable
+      id: setAppliesOnValue
+      variable: init:Topic.AppliesOnValue
+      value: '=Switch(Lower(Trim(Topic.AppliesOn)), "create", 734000000, "update", 734000001, 734000002)'
 
     - kind: Question
       id: askPriority
@@ -101,8 +181,61 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndCreate
-      activity:
-        text:
-          - "Creating rule **{Topic.RuleName}** for table **{Topic.TableName}** — {Topic.ElementType} `{Topic.ElementName}` | visibility: {Topic.Visibility} | requirement: {Topic.Requirement} | editability: {Topic.Editability} | applies on: {Topic.AppliesOn} | priority: {Topic.Priority}. One moment..."
+    - kind: Question
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "Here's the rule I'll create:\n• Table: **{Topic.CleanTableName}**\n• Name: **{Topic.RuleName}**\n• Element: {Topic.ElementType} `{Topic.ElementName}`\n• Visibility: {Topic.Visibility} | Requirement: {Topic.Requirement} | Editability: {Topic.Editability}\n• Applies on: {Topic.AppliesOn} | Priority: {Topic.Priority}\n\nProceed?"
+      entity: BooleanPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: createFormRule
+              displayName: Create mab_formrule record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: CreateRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formrules
+                  item/mab_managedtableid: =Topic.TableGuid
+                  item/mab_name: =Trim(Topic.RuleName)
+                  item/mab_elementtype: =Topic.ElementTypeValue
+                  item/mab_elementname: =Lower(Trim(Topic.ElementName))
+                  item/mab_setvisibility: =Topic.VisibilityValue
+                  item/mab_setrequirement: =Topic.RequirementValue
+                  item/mab_seteditability: =Topic.EditabilityValue
+                  item/mab_applieson: =Topic.AppliesOnValue
+                  item/mab_conditionmatch: 734000000
+                  item/mab_priority: =Topic.Priority
+                  item/mab_active: true
+              dynamicOutputSchema:
+                kind: Record
+                properties:
+                  mab_formruleid:
+                    type: String
+              output:
+                binding:
+                  mab_formruleid: Topic.NewRuleId
+
+            - kind: SendActivity
+              id: sendCreated
+              activity:
+                text:
+                  - "✅ Rule **{Topic.RuleName}** created and active.\n**Rule ID:** `{Topic.NewRuleId}`\n\nKeep this ID — you can now **add a condition**, **set a default value**, **add validation**, or **assign a role** to this rule."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Rule creation cancelled. Nothing was created.

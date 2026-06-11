@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Set Default Value
   description: Sets a default value on a CFE form rule — including dynamic Today and Current User.
 kind: AdaptiveDialog
+modelDescription: Sets a default value (applied when the field is empty) on an existing CFE form rule by updating its mab_formrule record. Supports text, number, boolean, choice, lookup and dynamic Today / Current User defaults.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -25,26 +26,89 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanRuleId
+      variable: init:Topic.CleanRuleId
+      value: '=Lower(Substitute(Substitute(Trim(Topic.RuleId), "{", ""), "}", ""))'
+
     - kind: Question
       id: askValueType
       variable: init:Topic.ValType
-      prompt: "What **type** of default value?\n• **text** / **number** / **boolean** / **choice** / **lookup** — fixed values\n• **today** — today's date (dynamic)\n• **currentuser** — current user's ID (dynamic)"
+      prompt: "What **type** of default value?\n• **text** / **number** / **boolean** / **choice** / **lookup** — fixed values\n• **today** — today's date (dynamic)\n• **currentuser** — current user (dynamic)"
       entity: StringPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: SetVariable
+      id: setValTypeValue
+      variable: init:Topic.ValTypeValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.ValType)), " ", ""), "text", 734000000, "number", 734000001, "boolean", 734000002, "choice", 734000003, "lookup", 734000004, "today", 734000005, "currentuser", 734000006, 734000000)'
+
+    - kind: SetVariable
+      id: initCleanValue
+      variable: init:Topic.CleanValue
+      value: =Blank()
+
+    - kind: ConditionGroup
+      id: checkDynamicType
+      conditions:
+        - id: isFixedType
+          condition: =And(Topic.ValTypeValue <> 734000005, Topic.ValTypeValue <> 734000006)
+          actions:
+            - kind: Question
+              id: askValue
+              variable: init:Topic.DefaultValue
+              prompt: "What is the **default value**? (For lookup use `logicalname:guid:displayname`. For choice use the integer option value. For boolean use `true` or `false`.)"
+              entity: StringPrebuiltEntity
+              alwaysPrompt: true
+              interruptionPolicy:
+                allowInterruption: true
+            - kind: SetVariable
+              id: setFixedValue
+              variable: Topic.CleanValue
+              value: =Trim(Topic.DefaultValue)
 
     - kind: Question
-      id: askValue
-      variable: init:Topic.DefaultValue
-      prompt: "What is the **default value**? (For today/currentuser type **dynamic**. For lookup: record GUID. For choice: the integer option value.)"
-      entity: StringPrebuiltEntity
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "I'll set the default on rule `{Topic.CleanRuleId}` — type: **{Topic.ValType}**, value: **{If(IsBlank(Topic.CleanValue), \"(dynamic)\", Topic.CleanValue)}** (applied only when the field is empty). Proceed?"
+      entity: BooleanPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndUpdate
-      activity:
-        text:
-          - "Setting default value on rule `{Topic.RuleId}` — type: **{Topic.ValType}**, value: **{Topic.DefaultValue}**. Updating the record..."
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: updateRule
+              displayName: Update mab_formrule with default value
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: UpdateOnlyRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formrules
+                  recordId: =Topic.CleanRuleId
+                  item/mab_setdefault: 734000001
+                  item/mab_defaultvaluetype: =Topic.ValTypeValue
+                  item/mab_defaultvalue: =Topic.CleanValue
+
+            - kind: SendActivity
+              id: sendUpdated
+              activity:
+                text:
+                  - "✅ Default value set on rule `{Topic.CleanRuleId}` — type **{Topic.ValType}**. It will fill the field only when it's empty."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Cancelled. The rule was not changed.

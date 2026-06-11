@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Add Condition
   description: Adds a condition to an existing CFE form rule.
 kind: AdaptiveDialog
+modelDescription: Adds a condition (mab_formrulecondition record) to an existing CFE form rule so the rule only fires when a driver field matches a value. Use when the user wants to make a rule conditional.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -24,6 +25,11 @@ beginDialog:
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: SetVariable
+      id: setCleanRuleId
+      variable: init:Topic.CleanRuleId
+      value: '=Lower(Substitute(Substitute(Trim(Topic.RuleId), "{", ""), "}", ""))'
 
     - kind: Question
       id: askConditionName
@@ -52,14 +58,24 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setOperatorValue
+      variable: init:Topic.OperatorValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.Operator)), " ", ""), "equals", 734000000, "notequals", 734000001, "contains", 734000002, "notcontains", 734000003, "doesnotcontain", 734000003, "isempty", 734000004, "isnotempty", 734000005, "in", 734000006, "greaterthan", 734000007, "lessthan", 734000008, 734000000)'
+
     - kind: Question
       id: askValue
       variable: init:Topic.CondValue
-      prompt: What **value** to compare against? (Type **blank** for IsEmpty/IsNotEmpty.)
+      prompt: What **value** to compare against? (For choices use the numeric option value e.g. `912360002`. For `in` use comma-separated values. Type **blank** for isempty/isnotempty.)
       entity: StringPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: SetVariable
+      id: setCleanValue
+      variable: init:Topic.CleanValue
+      value: '=If(Or(Lower(Trim(Topic.CondValue)) = "blank", Topic.OperatorValue = 734000004, Topic.OperatorValue = 734000005), Blank(), Trim(Topic.CondValue))'
 
     - kind: Question
       id: askValueType
@@ -70,8 +86,61 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndCreate
-      activity:
-        text:
-          - "Adding condition **{Topic.ConditionName}** to rule `{Topic.RuleId}` — when `{Topic.DriverField}` {Topic.Operator} `{Topic.CondValue}`. Creating now..."
+    - kind: SetVariable
+      id: setValueTypeValue
+      variable: init:Topic.ValueTypeValue
+      value: '=Switch(Lower(Trim(Topic.ValueType)), "text", 734000000, "number", 734000001, "boolean", 734000002, "choice", 734000003, "lookup", 734000004, 734000000)'
+
+    - kind: Question
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "I'll add condition **{Topic.ConditionName}** to rule `{Topic.CleanRuleId}` — when `{Topic.DriverField}` {Topic.Operator} `{Topic.CondValue}` ({Topic.ValueType}). Proceed?"
+      entity: BooleanPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: createCondition
+              displayName: Create mab_formrulecondition record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: CreateRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formruleconditions
+                  item/mab_formruleid: =Topic.CleanRuleId
+                  item/mab_name: =Trim(Topic.ConditionName)
+                  item/mab_driverfield: =Lower(Trim(Topic.DriverField))
+                  item/mab_operator: =Topic.OperatorValue
+                  item/mab_value: =Topic.CleanValue
+                  item/mab_valuetype: =Topic.ValueTypeValue
+              dynamicOutputSchema:
+                kind: Record
+                properties:
+                  mab_formruleconditionid:
+                    type: String
+              output:
+                binding:
+                  mab_formruleconditionid: Topic.NewConditionId
+
+            - kind: SendActivity
+              id: sendCreated
+              activity:
+                text:
+                  - "✅ Condition **{Topic.ConditionName}** added to the rule (condition ID: `{Topic.NewConditionId}`). Remember: multiple conditions on one rule are AND'd by default."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Cancelled. No condition was created.

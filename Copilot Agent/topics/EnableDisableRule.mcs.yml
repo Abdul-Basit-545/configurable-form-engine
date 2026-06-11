@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Enable Disable Rule
   description: Enables or disables a CFE form rule by toggling its active flag.
 kind: AdaptiveDialog
+modelDescription: Enables or disables an existing CFE form rule by updating the mab_active flag on its mab_formrule record. Use when the user wants to turn a rule on or off.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -26,6 +27,11 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanRuleId
+      variable: init:Topic.CleanRuleId
+      value: '=Lower(Substitute(Substitute(Trim(Topic.RuleId), "{", ""), "}", ""))'
+
     - kind: Question
       id: askAction
       variable: init:Topic.Action
@@ -35,8 +41,65 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndUpdate
-      activity:
-        text:
-          - "Got it — {Topic.Action}ing rule `{Topic.RuleId}` now. Updating the record..."
+    - kind: SetVariable
+      id: setCleanAction
+      variable: init:Topic.CleanAction
+      value: '=Substitute(Lower(Trim(Topic.Action)), " ", "")'
+
+    - kind: ConditionGroup
+      id: checkAction
+      conditions:
+        - id: actionEnable
+          condition: '=Or(Topic.CleanAction = "enable", Topic.CleanAction = "activate", Topic.CleanAction = "turnon", Topic.CleanAction = "on")'
+          actions:
+            - kind: InvokeConnectorAction
+              id: enableRule
+              displayName: Set mab_active to true
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: UpdateOnlyRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formrules
+                  recordId: =Topic.CleanRuleId
+                  item/mab_active: true
+
+            - kind: SendActivity
+              id: sendEnabled
+              activity:
+                text:
+                  - "✅ Rule `{Topic.CleanRuleId}` is now **enabled**. It will fire on the next form load (users may need to refresh / clear the CFE cache)."
+
+        - id: actionDisable
+          condition: '=Or(Topic.CleanAction = "disable", Topic.CleanAction = "deactivate", Topic.CleanAction = "turnoff", Topic.CleanAction = "off")'
+          actions:
+            - kind: InvokeConnectorAction
+              id: disableRule
+              displayName: Set mab_active to false
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: UpdateOnlyRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formrules
+                  recordId: =Topic.CleanRuleId
+                  item/mab_active: false
+
+            - kind: SendActivity
+              id: sendDisabled
+              activity:
+                text:
+                  - "✅ Rule `{Topic.CleanRuleId}` is now **disabled**. It will stop firing on the next form load (users may need to refresh / clear the CFE cache)."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendInvalidAction
+          activity:
+            text:
+              - I didn't catch that — please say **enable** or **disable**. Nothing was changed.
+        - kind: EndDialog
+          id: endInvalidAction

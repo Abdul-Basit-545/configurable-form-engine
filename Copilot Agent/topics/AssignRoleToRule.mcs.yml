@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Assign Role to Rule
   description: Restricts a CFE form rule to fire only for specific security roles.
 kind: AdaptiveDialog
+modelDescription: Restricts an existing CFE form rule to specific security roles by creating a mab_formrulerole record. Looks up the security role GUID automatically from the role's display name.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -25,26 +26,116 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanRuleId
+      variable: init:Topic.CleanRuleId
+      value: '=Lower(Substitute(Substitute(Trim(Topic.RuleId), "{", ""), "}", ""))'
+
     - kind: Question
       id: askRoleName
       variable: init:Topic.RoleName
-      prompt: What is the **display name** of the security role? (e.g. `CPM - Site PM`)
+      prompt: What is the **display name** of the security role? (e.g. `CPM - Site PM`) — I'll look up its GUID for you.
       entity: StringPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
+
+    - kind: InvokeConnectorAction
+      id: lookupRole
+      displayName: Look up the security role GUID by name
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: roles
+          "$select": roleid,name
+          "$filter": '="name eq ''" & Substitute(Trim(Topic.RoleName), "''", "''''") & "''"'
+          "$top": 1
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                roleid:
+                  type: String
+                name:
+                  type: String
+      output:
+        binding:
+          value: Topic.RoleRows
+
+    - kind: ConditionGroup
+      id: checkRoleFound
+      conditions:
+        - id: roleNotFound
+          condition: =CountRows(Topic.RoleRows) = 0
+          actions:
+            - kind: SendActivity
+              id: sendRoleNotFound
+              activity:
+                text:
+                  - "I couldn't find a security role named **{Topic.RoleName}**. Check the exact display name (Power Platform Admin Center > Security roles) and try again."
+            - kind: EndDialog
+              id: endRoleNotFound
+
+    - kind: SetVariable
+      id: setRoleGuid
+      variable: init:Topic.RoleGuid
+      value: =Lower(First(Topic.RoleRows).roleid)
 
     - kind: Question
-      id: askRoleGuid
-      variable: init:Topic.RoleGuid
-      prompt: What is the **GUID** of the security role? (lowercase, no braces — find it in Power Platform Admin Center > Security roles.)
-      entity: StringPrebuiltEntity
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "I'll restrict rule `{Topic.CleanRuleId}` to role **{Topic.RoleName}** (GUID: `{Topic.RoleGuid}`). The rule will only fire for users with this role. Proceed?"
+      entity: BooleanPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndCreate
-      activity:
-        text:
-          - "Restricting rule `{Topic.RuleId}` to role **{Topic.RoleName}**. Adding the role entry now..."
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: createRuleRole
+              displayName: Create mab_formrulerole record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: CreateRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formruleroles
+                  item/mab_ruleid: =Topic.CleanRuleId
+                  item/mab_rolename: =Trim(Topic.RoleName)
+                  item/mab_roleguid: =Topic.RoleGuid
+              dynamicOutputSchema:
+                kind: Record
+                properties:
+                  mab_formruleroleid:
+                    type: String
+              output:
+                binding:
+                  mab_formruleroleid: Topic.NewRoleEntryId
+
+            - kind: SendActivity
+              id: sendCreated
+              activity:
+                text:
+                  - "✅ Rule `{Topic.CleanRuleId}` is now restricted to role **{Topic.RoleName}** (entry ID: `{Topic.NewRoleEntryId}`). Add more roles to allow any of them."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Cancelled. No role restriction was added.

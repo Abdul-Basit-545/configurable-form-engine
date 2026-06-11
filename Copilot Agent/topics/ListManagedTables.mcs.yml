@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: List Managed Tables
   description: Lists all tables currently registered in the CFE.
 kind: AdaptiveDialog
+modelDescription: Lists all Dataverse tables currently registered in the Configurable Form Engine, with their enabled state and record IDs.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -15,8 +16,59 @@ beginDialog:
       - show all CFE tables
 
   actions:
+    - kind: InvokeConnectorAction
+      id: listTables
+      displayName: List all managed tables
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_managedtables
+          "$select": mab_managedtableid,mab_name,mab_enabled
+          "$orderby": mab_name asc
+          "$top": 100
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_managedtableid:
+                  type: String
+                mab_name:
+                  type: String
+                mab_enabled:
+                  type: Boolean
+      output:
+        binding:
+          value: Topic.Tables
+
+    - kind: ConditionGroup
+      id: checkTablesFound
+      conditions:
+        - id: noTables
+          condition: =CountRows(Topic.Tables) = 0
+          actions:
+            - kind: SendActivity
+              id: sendNoTables
+              activity:
+                text:
+                  - "No tables are registered in the CFE yet. Say **register a table** to onboard your first one."
+            - kind: EndDialog
+              id: endNoTables
+
+    - kind: SetVariable
+      id: setTablesText
+      variable: init:Topic.TablesText
+      value: "=Concat(Topic.Tables, \"• **\" & mab_name & \"** \" & If(mab_enabled, \"🟢 enabled\", \"⚪ disabled\") & \" | ID: `\" & mab_managedtableid & \"`\" & Char(10))"
+
     - kind: SendActivity
-      id: fetching
+      id: sendTables
       activity:
         text:
-          - Fetching all registered CFE tables...
+          - "Tables registered in the CFE:\n\n{Topic.TablesText}\nSay **list rules for a table** to see what rules a table has."

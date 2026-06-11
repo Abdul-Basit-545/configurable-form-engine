@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Register Table
   description: Registers a new table into the CFE so the form engine can manage it.
 kind: AdaptiveDialog
+modelDescription: Registers a Dataverse table into the Configurable Form Engine (CFE) by creating a mab_managedtable record. Use when the user wants to register, onboard or enable a table for the form engine.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -24,26 +25,101 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanName
+      variable: init:Topic.CleanName
+      value: =Lower(Trim(Topic.TableName))
+
+    - kind: InvokeConnectorAction
+      id: checkExisting
+      displayName: Check if table is already registered
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_managedtables
+          "$select": mab_managedtableid,mab_name
+          "$filter": ="mab_name eq '" & Topic.CleanName & "'"
+          "$top": 1
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_managedtableid:
+                  type: String
+                mab_name:
+                  type: String
+      output:
+        binding:
+          value: Topic.ExistingTables
+
+    - kind: ConditionGroup
+      id: checkDuplicate
+      conditions:
+        - id: alreadyRegistered
+          condition: =CountRows(Topic.ExistingTables) > 0
+          actions:
+            - kind: SendActivity
+              id: sendAlreadyRegistered
+              activity:
+                text:
+                  - "Table **{Topic.CleanName}** is already registered in the CFE (record ID: `{First(Topic.ExistingTables).mab_managedtableid}`). No new record is needed."
+            - kind: EndDialog
+              id: endAlreadyRegistered
+
     - kind: Question
-      id: askDefaultFieldVis
-      variable: init:Topic.DefaultFieldVis
-      prompt: What should the **default field visibility** be? Reply **hidden** (deny-by-default, recommended) or **visible**.
-      entity: StringPrebuiltEntity
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "I'll register table **{Topic.CleanName}** into the CFE and enable it. Proceed?"
+      entity: BooleanPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: Question
-      id: askDefaultTabVis
-      variable: init:Topic.DefaultTabVis
-      prompt: What should the **default tab visibility** be? Reply **hidden** or **visible**.
-      entity: StringPrebuiltEntity
-      alwaysPrompt: true
-      interruptionPolicy:
-        allowInterruption: true
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: createManagedTable
+              displayName: Create mab_managedtable record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: CreateRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_managedtables
+                  item/mab_name: =Topic.CleanName
+                  item/mab_enabled: true
+              dynamicOutputSchema:
+                kind: Record
+                properties:
+                  mab_managedtableid:
+                    type: String
+              output:
+                binding:
+                  mab_managedtableid: Topic.NewTableId
 
-    - kind: SendActivity
-      id: confirmAndCreate
-      activity:
-        text:
-          - "Got it! Registering table **{Topic.TableName}** with default field visibility **{Topic.DefaultFieldVis}** and tab visibility **{Topic.DefaultTabVis}**. Creating the record now..."
+            - kind: SendActivity
+              id: sendCreated
+              activity:
+                text:
+                  - "✅ Table **{Topic.CleanName}** is now registered and enabled in the CFE (record ID: `{Topic.NewTableId}`). Next you can **register a form** for it or **create a rule**."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Registration cancelled. Nothing was created.

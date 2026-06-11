@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Register Form
   description: Registers a specific form of a managed table so rules can be scoped per form.
 kind: AdaptiveDialog
+modelDescription: Registers a specific model-driven form under a CFE managed table by creating a mab_managedform record, so rules can be scoped to that form. Use when the user wants to register or add a form.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -24,6 +25,60 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanTableName
+      variable: init:Topic.CleanTableName
+      value: =Lower(Trim(Topic.TableName))
+
+    - kind: InvokeConnectorAction
+      id: lookupTable
+      displayName: Look up the managed table record
+      connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+      connectionProperties:
+        mode: Invoker
+      operationId: ListRecordsWithOrganization
+      input:
+        binding:
+          organization: https://orgf7fa940a.crm4.dynamics.com
+          entityName: mab_managedtables
+          "$select": mab_managedtableid,mab_name
+          "$filter": ="mab_name eq '" & Topic.CleanTableName & "'"
+          "$top": 1
+      dynamicOutputSchema:
+        kind: Record
+        properties:
+          value:
+            order: 0
+            type:
+              kind: Table
+              properties:
+                mab_managedtableid:
+                  type: String
+                mab_name:
+                  type: String
+      output:
+        binding:
+          value: Topic.TableRows
+
+    - kind: ConditionGroup
+      id: checkTableFound
+      conditions:
+        - id: tableNotFound
+          condition: =CountRows(Topic.TableRows) = 0
+          actions:
+            - kind: SendActivity
+              id: sendTableNotFound
+              activity:
+                text:
+                  - "I couldn't find a managed table named **{Topic.CleanTableName}** in the CFE. Please **register the table** first, then register the form."
+            - kind: EndDialog
+              id: endTableNotFound
+
+    - kind: SetVariable
+      id: setTableGuid
+      variable: init:Topic.TableGuid
+      value: =First(Topic.TableRows).mab_managedtableid
+
     - kind: Question
       id: askFormName
       variable: init:Topic.FormName
@@ -42,6 +97,11 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setFormTypeValue
+      variable: init:Topic.FormTypeValue
+      value: '=Switch(Substitute(Lower(Trim(Topic.FormType)), " ", ""), "main", 734000000, "quickcreate", 734000001, "quickview", 734000002, "card", 734000003, 734000000)'
+
     - kind: Question
       id: askFormId
       variable: init:Topic.FormId
@@ -51,8 +111,60 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
-    - kind: SendActivity
-      id: confirmAndCreate
-      activity:
-        text:
-          - "Got it! Registering form **{Topic.FormName}** ({Topic.FormType}) under table **{Topic.TableName}**. Creating the record now..."
+    - kind: SetVariable
+      id: setCleanFormId
+      variable: init:Topic.CleanFormId
+      value: '=If(Lower(Trim(Topic.FormId)) = "skip", Blank(), Lower(Substitute(Substitute(Trim(Topic.FormId), "{", ""), "}", "")))'
+
+    - kind: Question
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "I'll register form **{Topic.FormName}** ({Topic.FormType}) under table **{Topic.CleanTableName}** and enable it. Proceed?"
+      entity: BooleanPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Topic.Confirm = true
+          actions:
+            - kind: InvokeConnectorAction
+              id: createManagedForm
+              displayName: Create mab_managedform record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: CreateRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_managedforms
+                  item/mab_managedtableid: =Topic.TableGuid
+                  item/mab_name: =Trim(Topic.FormName)
+                  item/mab_formtype: =Topic.FormTypeValue
+                  item/mab_formid: =Topic.CleanFormId
+                  item/mab_enabled: true
+              dynamicOutputSchema:
+                kind: Record
+                properties:
+                  mab_managedformid:
+                    type: String
+              output:
+                binding:
+                  mab_managedformid: Topic.NewFormId
+
+            - kind: SendActivity
+              id: sendCreated
+              activity:
+                text:
+                  - "✅ Form **{Topic.FormName}** is now registered under **{Topic.CleanTableName}** (record ID: `{Topic.NewFormId}`). You can now scope rules to this form."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Registration cancelled. Nothing was created.

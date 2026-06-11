@@ -2,6 +2,7 @@ mcs.metadata:
   componentName: Delete Rule
   description: Permanently deletes a CFE form rule and all its child conditions and role entries.
 kind: AdaptiveDialog
+modelDescription: Permanently deletes a CFE form rule (mab_formrule record). Its child conditions and role entries are removed automatically by cascade delete. Always requires explicit confirmation.
 beginDialog:
   kind: OnRecognizedIntent
   id: main
@@ -23,10 +24,15 @@ beginDialog:
       interruptionPolicy:
         allowInterruption: true
 
+    - kind: SetVariable
+      id: setCleanRuleId
+      variable: init:Topic.CleanRuleId
+      value: '=Lower(Substitute(Substitute(Trim(Topic.RuleId), "{", ""), "}", ""))'
+
     - kind: Question
       id: askConfirm
       variable: init:Topic.Confirm
-      prompt: "⚠️ Are you sure you want to permanently delete rule `{Topic.RuleId}`? This also deletes all its conditions and role entries. Type **yes** to confirm."
+      prompt: "⚠️ Are you sure you want to permanently delete rule `{Topic.CleanRuleId}`? This also deletes all its conditions and role entries. Type **yes** to confirm."
       entity: StringPrebuiltEntity
       alwaysPrompt: true
       interruptionPolicy:
@@ -36,13 +42,26 @@ beginDialog:
       id: checkConfirm
       conditions:
         - id: confirmed
-          condition: =Lower(Topic.Confirm) = "yes"
+          condition: =Lower(Trim(Topic.Confirm)) = "yes"
           actions:
+            - kind: InvokeConnectorAction
+              id: deleteRule
+              displayName: Delete mab_formrule record
+              connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+              connectionProperties:
+                mode: Invoker
+              operationId: DeleteRecordWithOrganization
+              input:
+                binding:
+                  organization: https://orgf7fa940a.crm4.dynamics.com
+                  entityName: mab_formrules
+                  recordId: =Topic.CleanRuleId
+
             - kind: SendActivity
-              id: sendDeleting
+              id: sendDeleted
               activity:
                 text:
-                  - "Deleting rule `{Topic.RuleId}` now..."
+                  - "🗑️ Rule `{Topic.CleanRuleId}` has been permanently deleted, along with its conditions and role entries."
 
       elseActions:
         - kind: SendActivity
