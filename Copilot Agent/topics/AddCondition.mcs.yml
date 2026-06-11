@@ -117,7 +117,7 @@ beginDialog:
                 binding:
                   organization: https://orgf7fa940a.crm4.dynamics.com
                   entityName: mab_formruleconditions
-                  item/mab_formruleid: =Topic.CleanRuleId
+                  "item/mab_formruleid@odata.bind": ="mab_formrules(" & Topic.CleanRuleId & ")"
                   item/mab_name: =Trim(Topic.ConditionName)
                   item/mab_driverfield: =Lower(Trim(Topic.DriverField))
                   item/mab_operator: =Topic.OperatorValue
