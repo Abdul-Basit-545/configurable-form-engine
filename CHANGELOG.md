@@ -28,7 +28,6 @@ All notable changes to the **Configurable Form Engine (CFE)** project — the fo
 
 Planned / under consideration:
 - Environment variable for the Dataverse org URL (currently hardcoded — search-replace when moving environments)
-- Power Automate flow + `InvokeFlowTaskAction` for lookup-field *updates* (the direct Dataverse connector cannot update lookups — see 2026-06-11 notes below)
 - Form engine: form-type scoping, conditional-validation gating, instant Lock-When-Set
 
 ---
