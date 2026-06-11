@@ -1,0 +1,56 @@
+mcs.metadata:
+  componentName: CFE - Create Form Rule
+kind: TaskDialog
+modelDisplayName: CFE - Create Form Rule
+modelDescription: Creates a mab_formrule record in the Configurable Form Engine. Use this (not the generic Add row tool) when creating a form rule — it correctly binds the mab_managedtableid lookup using OData bind syntax.
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: ="https://orgf7fa940a.crm4.dynamics.com"
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: ="mab_formrules"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_name
+    description: Short rule name, e.g. "Description Required on Create"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_elementtype
+    description: "Choice value: Field=734000000, Tab=734000001, Section=734000002, Form=734000003"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_elementname
+    description: Logical name of the field/tab/section, e.g. description
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_setvisibility
+    description: "Choice: NoChange=734000000, Show=734000001, Hide=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_setrequirement
+    description: "Choice: NoChange=734000000, Required=734000001, Optional=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_seteditability
+    description: "Choice: NoChange=734000000, Editable=734000001, ReadOnly=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_applieson
+    description: "Choice: Create=734000000, Update=734000001, Both=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_conditionmatch
+    description: "Choice: All_AND=734000000, Any_OR=734000001"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_priority
+    description: Integer — lower fires first, e.g. 50
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_active
+    description: Boolean — true to enable the rule immediately
+  - kind: AutomaticTaskInput
+    propertyName: "item/mab_managedtableid@odata.bind"
+    description: "OData bind path for the parent managed table. Value MUST be in format: /mab_managedtables(guid) — e.g. /mab_managedtables(5b6b9980-fe64-f111-a825-7ced8d2ec652). Look up the GUID first using List rows if needed."
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+  operationId: CreateRecordWithOrganization
+
+outputMode: All

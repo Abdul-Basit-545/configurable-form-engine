@@ -1,0 +1,32 @@
+mcs.metadata:
+  componentName: CFE - Assign Role to Rule
+kind: TaskDialog
+modelDisplayName: CFE - Assign Role to Rule
+modelDescription: Creates a mab_formrulerole record in the Configurable Form Engine. Use this (not the generic Add row tool) when restricting a rule to a security role — it correctly binds the mab_ruleid lookup using OData bind syntax.
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: ="https://orgf7fa940a.crm4.dynamics.com"
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: ="mab_formruleroles"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_rolename
+    description: Display name of the security role, e.g. "Sales Manager"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_roleguid
+    description: Lowercase GUID of the security role without braces
+  - kind: AutomaticTaskInput
+    propertyName: "item/mab_ruleid@odata.bind"
+    description: "OData bind path for the parent form rule. Value MUST be in format: /mab_formrules(guid) — e.g. /mab_formrules(90330242-ff64-f111-a825-7ced8d2ec652). Look up the GUID first using List rows if needed."
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+  operationId: CreateRecordWithOrganization
+
+outputMode: All

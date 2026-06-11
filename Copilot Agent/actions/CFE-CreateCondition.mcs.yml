@@ -1,0 +1,44 @@
+mcs.metadata:
+  componentName: CFE - Create Rule Condition
+kind: TaskDialog
+modelDisplayName: CFE - Create Rule Condition
+modelDescription: Creates a mab_formrulecondition record in the Configurable Form Engine. Use this (not the generic Add row tool) when adding a condition to a rule — it correctly binds the mab_formruleid lookup using OData bind syntax.
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: ="https://orgf7fa940a.crm4.dynamics.com"
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: ="mab_formruleconditions"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_name
+    description: Condition name, e.g. "Status is Active"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_driverfield
+    description: Logical name of the field whose value is checked, e.g. sysai_status
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_operator
+    description: "Choice: Equals=734000000, NotEquals=734000001, Contains=734000002, NotContains=734000003, IsEmpty=734000004, IsNotEmpty=734000005, In=734000006, GreaterThan=734000007, LessThan=734000008"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_value
+    description: Value to compare against (leave blank for IsEmpty/IsNotEmpty)
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_valuetype
+    description: "Choice: Text=734000000, Number=734000001, Boolean=734000002, Choice=734000003, Lookup=734000004"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_sequence
+    description: Integer — ordering of this condition within the rule
+  - kind: AutomaticTaskInput
+    propertyName: "item/mab_formruleid@odata.bind"
+    description: "OData bind path for the parent form rule. Value MUST be in format: /mab_formrules(guid) — e.g. /mab_formrules(90330242-ff64-f111-a825-7ced8d2ec652). Look up the GUID first using List rows if needed."
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+  operationId: CreateRecordWithOrganization
+
+outputMode: All

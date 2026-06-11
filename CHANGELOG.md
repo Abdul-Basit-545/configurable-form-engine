@@ -4,6 +4,26 @@ All notable changes to the **Configurable Form Engine (CFE)** project — the fo
 
 ---
 
+## 2026-06-12 — CFE Configurator agent: lookup field fix (CREATE operations)
+
+### Fixed
+- **Lookup fields on create now work correctly end-to-end.** Previously the generative AI was passing a bare GUID string for lookup columns (e.g. `mab_managedtableid = "guid"`), which caused a Dataverse 400 error: *"A PrimitiveValue node with non-null value was found... StartObject or null expected"*.
+- Root cause: `AutomaticTaskInput` (AI-generated field names) cannot reliably preserve the `@` sign in `field@odata.bind` property names — the AI drops the `@`, sending `fieldodata.bind`, which Dataverse also rejects.
+
+### Added
+- **4 CFE-specific action files** with `@odata.bind` property names defined **statically** in the YAML schema — the AI only provides the value (e.g. `/mab_managedtables(guid)`), never the field name:
+  - `CFE-CreateFormRule.mcs.yml` — creates `mab_formrule` with `mab_managedtableid@odata.bind`
+  - `CFE-CreateManagedForm.mcs.yml` — creates `mab_managedform` with `mab_managedtableid@odata.bind`
+  - `CFE-CreateCondition.mcs.yml` — creates `mab_formrulecondition` with `mab_formruleid@odata.bind`
+  - `CFE-CreateRoleAssignment.mcs.yml` — creates `mab_formrulerole` with `mab_ruleid@odata.bind`
+- Agent instructions updated to route create operations to the correct CFE-specific tool instead of the generic "Add a new row" tool.
+
+### Notes
+- `UPDATE` operations with lookup fields still require a Power Automate flow — the Dataverse connector strips `@` from property names on PATCH requests. No current CFE workflow requires updating a lookup, so this is not yet blocking.
+- Validated: 35 YAML files, 0 errors, 0 warnings. Live-tested with *"Make Dependency Type field mandatory on create for task dependencies"* — rule created successfully.
+
+---
+
 ## [Unreleased]
 
 Planned / under consideration:

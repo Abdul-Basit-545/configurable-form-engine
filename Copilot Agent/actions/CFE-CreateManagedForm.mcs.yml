@@ -1,0 +1,44 @@
+mcs.metadata:
+  componentName: CFE - Create Managed Form
+kind: TaskDialog
+modelDisplayName: CFE - Create Managed Form
+modelDescription: Creates a mab_managedform record in the Configurable Form Engine. Use this (not the generic Add row tool) when registering a form — it correctly binds the mab_managedtableid lookup using OData bind syntax.
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: ="https://orgf7fa940a.crm4.dynamics.com"
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: ="mab_managedforms"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_name
+    description: Form display name, e.g. "Information"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_formtype
+    description: "Choice: Main=734000000, QuickCreate=734000001, QuickView=734000002, Card=734000003"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_formid
+    description: The form GUID from make.powerapps.com (plain GUID, no braces)
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_enabled
+    description: Boolean — true to enable this form scope
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_defaultfieldvisibility
+    description: "Choice: UseTableDefault=734000000, Hidden=734000001, Visible=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: item/mab_defaulttabvisibility
+    description: "Choice: UseTableDefault=734000000, Hidden=734000001, Visible=734000002"
+  - kind: AutomaticTaskInput
+    propertyName: "item/mab_managedtableid@odata.bind"
+    description: "OData bind path for the parent managed table. Value MUST be in format: /mab_managedtables(guid) — e.g. /mab_managedtables(5b6b9980-fe64-f111-a825-7ced8d2ec652). Look up the GUID first using List rows if needed."
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+  operationId: CreateRecordWithOrganization
+
+outputMode: All
