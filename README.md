@@ -27,6 +27,12 @@ A single web resource that drives model-driven app form behaviour entirely from 
 
 ---
 
+## CFE Configurator — Copilot Studio agent 🤖
+
+This repo also ships a **Copilot Studio agent** ([`Copilot Agent/`](Copilot%20Agent/)) that lets PMs and BAs configure all of the above conversationally — register tables, create rules, add conditions, set defaults and validation, restrict by role — **no JavaScript, no manual Dataverse data entry**. Every operation is a guided, deterministic flow with confirmation before any write.
+
+---
+
 ## Full documentation
 
 See **[Form Engine/README.md](Form%20Engine/README.md)** for:
@@ -34,6 +40,8 @@ See **[Form Engine/README.md](Form%20Engine/README.md)** for:
 - Step-by-step onboarding guide
 - Common rule examples (hide, required, defaults, locking)
 - Debugging and cache clearing
+
+📒 **[CHANGELOG.md](CHANGELOG.md)** — this project is under active development; the changelog tracks every release, fix and hard-won connector lesson.
 
 ---
 
