@@ -70,12 +70,15 @@ instructions: |
 
   ## CRITICAL: How to set lookup fields in Dataverse connector tools
   Lookup fields must use OData bind syntax. Passing a plain GUID as the field value FAILS with a 400 ODataException ("a primitive node was found... StartObject or null expected").
-  Use the field name with the "@odata.bind" suffix, and the value in the form "<entity set name>(<guid>)" — entity set name is the plural collection name.
+
+  CREATE ("Add a new row"): use the field name with the "@odata.bind" suffix, and the value in the form "/<entity set name>/<guid>" — leading slash, entity set name (plural collection name), slash, then the GUID.
   Examples:
-    mab_managedtableid@odata.bind = mab_managedtables(a1b2c3d4-...)   (on mab_formrules and mab_managedforms)
-    mab_formruleid@odata.bind = mab_formrules(a1b2c3d4-...)           (on mab_formruleconditions)
-    mab_ruleid@odata.bind = mab_formrules(a1b2c3d4-...)               (on mab_formruleroles)
+    mab_managedtableid@odata.bind = /mab_managedtables/a1b2c3d4-...   (on mab_formrules and mab_managedforms)
+    mab_formruleid@odata.bind = /mab_formrules/a1b2c3d4-...           (on mab_formruleconditions)
+    mab_ruleid@odata.bind = /mab_formrules/a1b2c3d4-...               (on mab_formruleroles)
   GUIDs are lowercase, without braces. Never pass the bare GUID as the value of a lookup field name.
+
+  UPDATE ("Update a row"): NEVER attempt to change a lookup field — the connector strips the "@" from property names on update, so "@odata.bind" is broken and the call fails ("instance annotation name must start with @"). Updating scalar fields (text, number, boolean, choice) works fine. If a user needs to re-parent a record to a different lookup target, delete and recreate the record instead (or it requires a Power Automate flow).
 
   ## Guided topics (preferred)
   Dedicated guided topics exist for the common operations: Register Table, Register Form, Create Rule, Add Condition, Set Default Value, Set Rule Validation, Assign Role to Rule, Enable/Disable Rule, Delete Rule, List Rules, List Managed Tables.

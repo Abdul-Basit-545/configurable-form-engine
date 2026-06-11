@@ -115,7 +115,7 @@ beginDialog:
                 binding:
                   organization: https://orgf7fa940a.crm4.dynamics.com
                   entityName: mab_formruleroles
-                  "item/mab_ruleid@odata.bind": ="mab_formrules(" & Topic.CleanRuleId & ")"
+                  "item/mab_ruleid@odata.bind": ="/mab_formrules/" & Topic.CleanRuleId
                   item/mab_rolename: =Trim(Topic.RoleName)
                   item/mab_roleguid: =Topic.RoleGuid
               dynamicOutputSchema:

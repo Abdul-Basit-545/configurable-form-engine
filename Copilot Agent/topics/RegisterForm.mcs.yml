@@ -142,7 +142,7 @@ beginDialog:
                 binding:
                   organization: https://orgf7fa940a.crm4.dynamics.com
                   entityName: mab_managedforms
-                  "item/mab_managedtableid@odata.bind": ="mab_managedtables(" & Topic.TableGuid & ")"
+                  "item/mab_managedtableid@odata.bind": ="/mab_managedtables/" & Topic.TableGuid
                   item/mab_name: =Trim(Topic.FormName)
                   item/mab_formtype: =Topic.FormTypeValue
                   item/mab_formid: =Topic.CleanFormId
