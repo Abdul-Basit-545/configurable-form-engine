@@ -1,0 +1,17 @@
+mcs.metadata:
+  componentName: Microsoft Dataverse - Update a row in selected environment
+kind: TaskDialog
+modelDisplayName: Update a row in selected environment
+modelDescription: Update a row in a table in a Power Platform environment.
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: UpdateOnlyRecordWithOrganization
+
+outputMode: All

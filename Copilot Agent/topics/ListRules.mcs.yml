@@ -1,0 +1,32 @@
+mcs.metadata:
+  componentName: List Rules
+  description: Lists all CFE form rules for a managed table.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: List Rules
+    triggerQueries:
+      - list rules for a table
+      - show rules
+      - what rules exist
+      - view form rules
+      - get rules for table
+      - list CFE rules
+
+  actions:
+    - kind: Question
+      id: askTableName
+      variable: init:Topic.TableName
+      prompt: Which table do you want to see rules for? (logical name, e.g. `account`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: fetching
+      activity:
+        text:
+          - "Looking up rules for table **{Topic.TableName}**..."

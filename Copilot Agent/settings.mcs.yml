@@ -1,0 +1,26 @@
+displayName: CFE Agent
+schemaName: mab_CFEAgent
+accessControlPolicy: GroupMembership
+authenticationMode: Integrated
+authenticationTrigger: Always
+configuration:
+  settings:
+    GenerativeActionsEnabled: true
+
+  isAgentConnectable: true
+  gPTSettings:
+    defaultSchemaName: mab_CFEAgent.gpt.default
+
+  aISettings:
+    useModelKnowledge: true
+    isFileAnalysisEnabled: true
+    isSemanticSearchEnabled: true
+    contentModeration: Low
+    optInUseLatestModels: false
+
+  recognizer:
+    kind: GenerativeAIRecognizer
+
+publishedOn: 2026-06-10T18:56:27.0000000Z
+template: default-2.1.0
+language: 1033

@@ -1,0 +1,50 @@
+mcs.metadata:
+  componentName: Set Default Value
+  description: Sets a default value on a CFE form rule — including dynamic Today and Current User.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Set Default Value
+    triggerQueries:
+      - set a default value
+      - add default value to a rule
+      - default field value
+      - set today as default
+      - set current user as default
+      - pre-populate a field
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule to set the default on?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValueType
+      variable: init:Topic.ValType
+      prompt: "What **type** of default value?\n• **text** / **number** / **boolean** / **choice** / **lookup** — fixed values\n• **today** — today's date (dynamic)\n• **currentuser** — current user's ID (dynamic)"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValue
+      variable: init:Topic.DefaultValue
+      prompt: "What is the **default value**? (For today/currentuser type **dynamic**. For lookup: record GUID. For choice: the integer option value.)"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndUpdate
+      activity:
+        text:
+          - "Setting default value on rule `{Topic.RuleId}` — type: **{Topic.ValType}**, value: **{Topic.DefaultValue}**. Updating the record..."

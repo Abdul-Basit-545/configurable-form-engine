@@ -1,0 +1,50 @@
+mcs.metadata:
+  componentName: Assign Role to Rule
+  description: Restricts a CFE form rule to fire only for specific security roles.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Assign Role to Rule
+    triggerQueries:
+      - assign a role to a rule
+      - restrict rule to a role
+      - add security role to rule
+      - role-based rule
+      - limit rule to role
+      - add role filter
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule you want to restrict to a role?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askRoleName
+      variable: init:Topic.RoleName
+      prompt: What is the **display name** of the security role? (e.g. `CPM - Site PM`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askRoleGuid
+      variable: init:Topic.RoleGuid
+      prompt: What is the **GUID** of the security role? (lowercase, no braces — find it in Power Platform Admin Center > Security roles.)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndCreate
+      activity:
+        text:
+          - "Restricting rule `{Topic.RuleId}` to role **{Topic.RoleName}**. Adding the role entry now..."

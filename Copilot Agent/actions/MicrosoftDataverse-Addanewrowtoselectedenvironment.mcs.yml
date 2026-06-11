@@ -1,0 +1,17 @@
+mcs.metadata:
+  componentName: Microsoft Dataverse - Add a new row to selected environment
+kind: TaskDialog
+modelDisplayName: Add a new row to selected environment
+modelDescription: Create a new row in a table in a Power Platform environment.
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: CreateRecordWithOrganization
+
+outputMode: All

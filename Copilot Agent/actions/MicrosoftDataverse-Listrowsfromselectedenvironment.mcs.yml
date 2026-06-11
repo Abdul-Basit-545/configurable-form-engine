@@ -1,0 +1,40 @@
+mcs.metadata:
+  componentName: Microsoft Dataverse - List rows from selected environment
+kind: TaskDialog
+modelDisplayName: List rows from selected environment
+modelDescription: List rows from a table in a Power Platform environment.
+outputs:
+  - propertyName: @odata.nextLink
+    name: Next link
+    description: The url to fetch next page data.
+
+  - propertyName: value
+    name: value
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: ListRecordsWithOrganization
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      "@odata.nextLink":
+        displayName: Next link
+        description: The url to fetch next page data.
+        visibility: Advanced
+        order: 1
+        type: String
+
+      value:
+        order: 0
+        type:
+          kind: Table
+          properties:
+            dynamicProperties:
+              order: 0
+              type: Any
+
+outputMode: All
