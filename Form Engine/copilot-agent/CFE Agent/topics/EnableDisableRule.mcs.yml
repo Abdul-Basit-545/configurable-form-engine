@@ -1,0 +1,42 @@
+mcs.metadata:
+  componentName: Enable Disable Rule
+  description: Enables or disables a CFE form rule by toggling its active flag.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Enable Disable Rule
+    triggerQueries:
+      - enable a rule
+      - disable a rule
+      - turn off a rule
+      - turn on a rule
+      - activate rule
+      - deactivate rule
+      - toggle rule
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule you want to enable or disable?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askAction
+      variable: init:Topic.Action
+      prompt: Do you want to **enable** or **disable** this rule?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndUpdate
+      activity:
+        text:
+          - "Got it — {Topic.Action}ing rule `{Topic.RuleId}` now. Updating the record..."

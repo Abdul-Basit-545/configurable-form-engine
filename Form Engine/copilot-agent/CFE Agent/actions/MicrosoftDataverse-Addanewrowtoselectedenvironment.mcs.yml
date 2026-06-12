@@ -1,0 +1,837 @@
+mcs.metadata:
+  componentName: Microsoft Dataverse - Add a new row to selected environment
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: current
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: mab_formrules
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_name'
+    description: Short rule name e.g. "Hide Credit Limit on Create"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_elementtype'
+    description: "Choice: Field=734000000, Tab=734000001, Section=734000002, Form=734000003"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_elementname'
+    description: Logical name of the field/tab/section e.g. description
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_setvisibility'
+    description: "Choice: NoChange=734000000, Show=734000001, Hide=734000002"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_setrequirement'
+    description: "Choice: NoChange=734000000, Required=734000001, Optional=734000002"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_seteditability'
+    description: "Choice: NoChange=734000000, Editable=734000001, ReadOnly=734000002"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_applieson'
+    description: "Choice: Create=734000000, Update=734000001, Both=734000002"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_conditionmatch'
+    description: "Choice: All_AND=734000000, Any_OR=734000001"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_priority'
+    description: Integer — lower fires first e.g. 50
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_active'
+    description: Boolean — true to enable the rule immediately
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_managedtableid@odata.bind'
+    description: "OData bind path to the parent managed table. Format: /mab_managedtables(guid) — look up the GUID with List rows first, then prefix with /mab_managedtables( and suffix with )"
+    inputSettings: {}
+
+modelDisplayName: CFE - Create Form Rule
+modelDescription: Creates a mab_formrule record in the Configurable Form Engine. Use this tool (not the generic Add row) when creating a form rule. For managedTableId supply only the bare GUID of the parent mab_managedtable record.
+outputs:
+  - propertyName: _createdby_value
+    name: Created By (Value)
+    description: Unique identifier of the user who created the record.
+
+  - propertyName: _createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Created By (Type)
+    description: Unique identifier of the user who created the record.
+
+  - propertyName: _createdonbehalfby_value
+    name: Created By (Delegate) (Value)
+    description: Unique identifier of the delegate user who created the record.
+
+  - propertyName: _createdonbehalfby_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Created By (Delegate) (Type)
+    description: Unique identifier of the delegate user who created the record.
+
+  - propertyName: _mab_managedformid_value
+    name: Managed Form (Value)
+
+  - propertyName: _mab_managedformid_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Managed Form (Type)
+
+  - propertyName: _mab_managedtableid_value
+    name: Managed Table (Value)
+
+  - propertyName: _mab_managedtableid_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Managed Table (Type)
+
+  - propertyName: _modifiedby_value
+    name: Modified By (Value)
+    description: Unique identifier of the user who modified the record.
+
+  - propertyName: _modifiedby_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Modified By (Type)
+    description: Unique identifier of the user who modified the record.
+
+  - propertyName: _modifiedonbehalfby_value
+    name: Modified By (Delegate) (Value)
+    description: Unique identifier of the delegate user who modified the record.
+
+  - propertyName: _modifiedonbehalfby_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Modified By (Delegate) (Type)
+    description: Unique identifier of the delegate user who modified the record.
+
+  - propertyName: _ownerid_value
+    name: Owner (Value)
+    description: Owner Id
+
+  - propertyName: _ownerid_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Owner (Type)
+    description: Owner Id
+
+  - propertyName: _owningbusinessunit_value
+    name: Owning Business Unit (Value)
+    description: Unique identifier for the business unit that owns the record
+
+  - propertyName: _owningbusinessunit_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Owning Business Unit (Type)
+    description: Unique identifier for the business unit that owns the record
+
+  - propertyName: _owningteam_value
+    name: Owning Team (Value)
+    description: Unique identifier for the team that owns the record.
+
+  - propertyName: _owningteam_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Owning Team (Type)
+    description: Unique identifier for the team that owns the record.
+
+  - propertyName: _owninguser_value
+    name: Owning User (Value)
+    description: Unique identifier for the user that owns the record.
+
+  - propertyName: _owninguser_value@Microsoft.Dynamics.CRM.lookuplogicalname
+    name: Owning User (Type)
+    description: Unique identifier for the user that owns the record.
+
+  - propertyName: @odata.id
+    name: OData Id
+    description: OData row id
+
+  - propertyName: createdon
+    name: Created On
+    description: Date and time when the record was created.
+
+  - propertyName: importsequencenumber
+    name: Import Sequence Number
+    description: Sequence number of the import that created this record.
+
+  - propertyName: mab_active
+    name: Active
+
+  - propertyName: mab_applieson
+    name: Applies On
+
+  - propertyName: mab_conditionmatch
+    name: Condition Match
+
+  - propertyName: mab_defaultvalue
+    name: Default Value
+
+  - propertyName: mab_defaultvaluetype
+    name: Default Value Type
+
+  - propertyName: mab_description
+    name: Description
+
+  - propertyName: mab_elementname
+    name: Element Logical Name
+
+  - propertyName: mab_elementtype
+    name: Element Type
+
+  - propertyName: mab_formruleid
+    name: Form Rule
+    description: Unique identifier for entity instances
+
+  - propertyName: mab_name
+    name: Rule Name
+
+  - propertyName: mab_priority
+    name: Priority
+
+  - propertyName: mab_setdefault
+    name: Set Default Value
+
+  - propertyName: mab_seteditability
+    name: Set Editability
+
+  - propertyName: mab_setrequirement
+    name: Set Requirement
+
+  - propertyName: mab_setvisibility
+    name: Set Visibility
+
+  - propertyName: mab_validationparam
+    name: Validation Param
+    description: "Parameter for validation: max digit count (Numeric Only), max character count (Max Length), or regex pattern (Regex). Leave blank for other types."
+
+  - propertyName: mab_validationtype
+    name: Validation Type
+    description: Type of inline validation to run on the element field (field rules only)
+
+  - propertyName: mab_valuelock
+    name: Value Lock
+
+  - propertyName: modifiedon
+    name: Modified On
+    description: Date and time when the record was modified.
+
+  - propertyName: overriddencreatedon
+    name: Record Created On
+    description: Date and time that the record was migrated.
+
+  - propertyName: statecode
+    name: Status
+    description: Status of the Form Rule
+
+  - propertyName: statuscode
+    name: Status Reason
+    description: Reason for the status of the Form Rule
+
+  - propertyName: timezoneruleversionnumber
+    name: Time Zone Rule Version Number
+    description: For internal use only.
+
+  - propertyName: utcconversiontimezonecode
+    name: UTC Conversion Time Zone Code
+    description: Time zone code that was in use when the record was created.
+
+  - propertyName: versionnumber
+    name: Version Number
+    description: Version Number
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: CreateRecordWithOrganization
+  dynamicInputSchema:
+    properties:
+      entityName:
+        displayName: Table name
+        description: Choose a table
+        nameForModel: create_record_with_organization_entity_name
+        descriptionForModel: "Set this to the entity set name for the Dataverse table in which you are adding the row. Examples: accounts, contacts, incidents, cr3a_customtables."
+        isRequired: true
+        order: 1
+        dynamicValuesConfig:
+          capability: List
+
+        type: String
+
+      item:
+        displayName: Row Item
+        description: Row to create
+        isRequired: true
+        order: 2
+        type:
+          kind: Record
+          properties:
+            importsequencenumber:
+              displayName: Import Sequence Number
+              description: Sequence number of the import that created this record.
+              visibility: Advanced
+              order: 9
+              type: Number
+
+            mab_active:
+              displayName: Active
+              visibility: Advanced
+              order: 0
+              type: Boolean
+
+            mab_applieson:
+              displayName: Applies On
+              visibility: Advanced
+              order: 1
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_conditionmatch:
+              displayName: Condition Match
+              visibility: Advanced
+              order: 2
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_defaultvalue:
+              displayName: Default Value
+              visibility: Advanced
+              order: 3
+              type: String
+
+            mab_defaultvaluetype:
+              displayName: Default Value Type
+              visibility: Advanced
+              order: 4
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_description:
+              displayName: Description
+              visibility: Advanced
+              order: 5
+              type: String
+
+            mab_elementname:
+              displayName: Element Logical Name
+              visibility: Advanced
+              order: 6
+              type: String
+
+            mab_elementtype:
+              displayName: Element Type
+              visibility: Advanced
+              order: 7
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_formruleid:
+              displayName: Form Rule
+              description: Unique identifier for entity instances
+              visibility: Advanced
+              order: 8
+              type: String
+
+            mab_managedformid@odata.bind:
+              displayName: Managed Form (Managed Forms)
+              visibility: Advanced
+              order: 10
+              type: String
+
+            mab_managedtableid@odata.bind:
+              displayName: Managed Table (Managed Tables)
+              visibility: Advanced
+              order: 11
+              type: String
+
+            mab_name:
+              displayName: Rule Name
+              visibility: Advanced
+              order: 15
+              type: String
+
+            mab_priority:
+              displayName: Priority
+              visibility: Advanced
+              order: 13
+              type: Number
+
+            mab_setdefault:
+              displayName: Set Default Value
+              visibility: Advanced
+              order: 16
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_seteditability:
+              displayName: Set Editability
+              visibility: Advanced
+              order: 17
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_setrequirement:
+              displayName: Set Requirement
+              visibility: Advanced
+              order: 18
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_setvisibility:
+              displayName: Set Visibility
+              visibility: Advanced
+              order: 19
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_validationparam:
+              displayName: Validation Param
+              description: "Parameter for validation: max digit count (Numeric Only), max character count (Max Length), or regex pattern (Regex). Leave blank for other types."
+              visibility: Advanced
+              order: 23
+              type: String
+
+            mab_validationtype:
+              displayName: Validation Type
+              description: Type of inline validation to run on the element field (field rules only)
+              visibility: Advanced
+              order: 24
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            mab_valuelock:
+              displayName: Value Lock
+              visibility: Advanced
+              order: 25
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            overriddencreatedon:
+              displayName: Record Created On
+              description: Date and time that the record was migrated.
+              visibility: Advanced
+              order: 14
+              type: DateTime
+
+            ownerid@odata.bind:
+              displayName: Owner (Owners)
+              description: Owner Id
+              visibility: Advanced
+              order: 12
+              type: String
+
+            statuscode:
+              displayName: Status Reason
+              description: Reason for the status of the Form Rule
+              visibility: Advanced
+              order: 20
+              dynamicValuesConfig:
+                capability: List
+
+              type: Number
+
+            timezoneruleversionnumber:
+              displayName: Time Zone Rule Version Number
+              description: For internal use only.
+              visibility: Advanced
+              order: 21
+              type: Number
+
+            utcconversiontimezonecode:
+              displayName: UTC Conversion Time Zone Code
+              description: Time zone code that was in use when the record was created.
+              visibility: Advanced
+              order: 22
+              type: Number
+
+      organization:
+        displayName: Environment
+        description: Choose an environment
+        nameForModel: create_record_with_organization_organization
+        descriptionForModel: "Set this to the environment base URL containing the target Dataverse table. You MUST use a URL and NOT environment name. If name is provided, map to correct URL. If you cannot infer the base URL, default to URL of (Current). Examples: https://org12345.crm.dynamics.com/, https://exampleenv.crm.dynamics.com/"
+        isRequired: true
+        order: 0
+        dynamicValuesConfig:
+          capability: List
+
+        type: String
+
+      x-ms-odata-metadata-full:
+        displayName: Return Full Metadata
+        description: The header parameter to customer to opt-in returning full odata metadata in response.
+        nameForModel: create_record_with_organization_x_ms_odata_metadata_full
+        descriptionForModel: Set to true to include full OData metadata in response. False otherwise. If not specified default to false.
+        visibility: Advanced
+        order: 3
+        type: Boolean
+
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      _createdby_value:
+        displayName: Created By (Value)
+        description: Unique identifier of the user who created the record.
+        visibility: Advanced
+        order: 6
+        type: String
+
+      _createdby_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Created By (Type)
+        description: Unique identifier of the user who created the record.
+        visibility: Advanced
+        order: 5
+        type: String
+
+      _createdonbehalfby_value:
+        displayName: Created By (Delegate) (Value)
+        description: Unique identifier of the delegate user who created the record.
+        visibility: Advanced
+        order: 4
+        type: String
+
+      _createdonbehalfby_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Created By (Delegate) (Type)
+        description: Unique identifier of the delegate user who created the record.
+        visibility: Advanced
+        order: 3
+        type: String
+
+      _mab_managedformid_value:
+        displayName: Managed Form (Value)
+        visibility: Advanced
+        order: 16
+        type: String
+
+      _mab_managedformid_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Managed Form (Type)
+        visibility: Advanced
+        order: 15
+        type: String
+
+      _mab_managedtableid_value:
+        displayName: Managed Table (Value)
+        visibility: Advanced
+        order: 18
+        type: String
+
+      _mab_managedtableid_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Managed Table (Type)
+        visibility: Advanced
+        order: 17
+        type: String
+
+      _modifiedby_value:
+        displayName: Modified By (Value)
+        description: Unique identifier of the user who modified the record.
+        visibility: Advanced
+        order: 22
+        type: String
+
+      _modifiedby_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Modified By (Type)
+        description: Unique identifier of the user who modified the record.
+        visibility: Advanced
+        order: 21
+        type: String
+
+      _modifiedonbehalfby_value:
+        displayName: Modified By (Delegate) (Value)
+        description: Unique identifier of the delegate user who modified the record.
+        visibility: Advanced
+        order: 20
+        type: String
+
+      _modifiedonbehalfby_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Modified By (Delegate) (Type)
+        description: Unique identifier of the delegate user who modified the record.
+        visibility: Advanced
+        order: 19
+        type: String
+
+      _ownerid_value:
+        displayName: Owner (Value)
+        description: Owner Id
+        visibility: Advanced
+        order: 26
+        type: String
+
+      _ownerid_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Owner (Type)
+        description: Owner Id
+        visibility: Advanced
+        order: 25
+        type: String
+
+      _owningbusinessunit_value:
+        displayName: Owning Business Unit (Value)
+        description: Unique identifier for the business unit that owns the record
+        visibility: Advanced
+        order: 28
+        type: String
+
+      _owningbusinessunit_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Owning Business Unit (Type)
+        description: Unique identifier for the business unit that owns the record
+        visibility: Advanced
+        order: 27
+        type: String
+
+      _owningteam_value:
+        displayName: Owning Team (Value)
+        description: Unique identifier for the team that owns the record.
+        visibility: Advanced
+        order: 30
+        type: String
+
+      _owningteam_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Owning Team (Type)
+        description: Unique identifier for the team that owns the record.
+        visibility: Advanced
+        order: 29
+        type: String
+
+      _owninguser_value:
+        displayName: Owning User (Value)
+        description: Unique identifier for the user that owns the record.
+        visibility: Advanced
+        order: 32
+        type: String
+
+      _owninguser_value@Microsoft.Dynamics.CRM.lookuplogicalname:
+        displayName: Owning User (Type)
+        description: Unique identifier for the user that owns the record.
+        visibility: Advanced
+        order: 31
+        type: String
+
+      "@odata.id":
+        displayName: OData Id
+        description: OData row id
+        order: 24
+        type: String
+
+      createdon:
+        displayName: Created On
+        description: Date and time when the record was created.
+        visibility: Advanced
+        order: 7
+        type: DateTime
+
+      importsequencenumber:
+        displayName: Import Sequence Number
+        description: Sequence number of the import that created this record.
+        visibility: Advanced
+        order: 14
+        type: Number
+
+      mab_active:
+        displayName: Active
+        visibility: Advanced
+        order: 0
+        type: Boolean
+
+      mab_applieson:
+        displayName: Applies On
+        visibility: Advanced
+        order: 1
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_conditionmatch:
+        displayName: Condition Match
+        visibility: Advanced
+        order: 2
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_defaultvalue:
+        displayName: Default Value
+        visibility: Advanced
+        order: 8
+        type: String
+
+      mab_defaultvaluetype:
+        displayName: Default Value Type
+        visibility: Advanced
+        order: 9
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_description:
+        displayName: Description
+        visibility: Advanced
+        order: 10
+        type: String
+
+      mab_elementname:
+        displayName: Element Logical Name
+        visibility: Advanced
+        order: 11
+        type: String
+
+      mab_elementtype:
+        displayName: Element Type
+        visibility: Advanced
+        order: 12
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_formruleid:
+        displayName: Form Rule
+        description: Unique identifier for entity instances
+        visibility: Advanced
+        order: 13
+        type: String
+
+      mab_name:
+        displayName: Rule Name
+        visibility: Advanced
+        order: 35
+        type: String
+
+      mab_priority:
+        displayName: Priority
+        visibility: Advanced
+        order: 33
+        type: Number
+
+      mab_setdefault:
+        displayName: Set Default Value
+        visibility: Advanced
+        order: 36
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_seteditability:
+        displayName: Set Editability
+        visibility: Advanced
+        order: 37
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_setrequirement:
+        displayName: Set Requirement
+        visibility: Advanced
+        order: 38
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_setvisibility:
+        displayName: Set Visibility
+        visibility: Advanced
+        order: 39
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_validationparam:
+        displayName: Validation Param
+        description: "Parameter for validation: max digit count (Numeric Only), max character count (Max Length), or regex pattern (Regex). Leave blank for other types."
+        visibility: Advanced
+        order: 44
+        type: String
+
+      mab_validationtype:
+        displayName: Validation Type
+        description: Type of inline validation to run on the element field (field rules only)
+        visibility: Advanced
+        order: 45
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      mab_valuelock:
+        displayName: Value Lock
+        visibility: Advanced
+        order: 46
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      modifiedon:
+        displayName: Modified On
+        description: Date and time when the record was modified.
+        visibility: Advanced
+        order: 23
+        type: DateTime
+
+      overriddencreatedon:
+        displayName: Record Created On
+        description: Date and time that the record was migrated.
+        visibility: Advanced
+        order: 34
+        type: DateTime
+
+      statecode:
+        displayName: Status
+        description: Status of the Form Rule
+        visibility: Advanced
+        order: 40
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      statuscode:
+        displayName: Status Reason
+        description: Reason for the status of the Form Rule
+        visibility: Advanced
+        order: 41
+        dynamicValuesConfig:
+          capability: List
+
+        type: Number
+
+      timezoneruleversionnumber:
+        displayName: Time Zone Rule Version Number
+        description: For internal use only.
+        visibility: Advanced
+        order: 42
+        type: Number
+
+      utcconversiontimezonecode:
+        displayName: UTC Conversion Time Zone Code
+        description: Time zone code that was in use when the record was created.
+        visibility: Advanced
+        order: 43
+        type: Number
+
+      versionnumber:
+        displayName: Version Number
+        description: Version Number
+        visibility: Advanced
+        order: 47
+        type: Number
+
+outputMode: All

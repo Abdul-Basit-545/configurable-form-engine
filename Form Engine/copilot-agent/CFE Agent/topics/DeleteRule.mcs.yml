@@ -1,0 +1,54 @@
+mcs.metadata:
+  componentName: Delete Rule
+  description: Permanently deletes a CFE form rule and all its child conditions and role entries.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Delete Rule
+    triggerQueries:
+      - delete a rule
+      - remove a rule
+      - delete CFE rule
+      - remove form rule
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule you want to permanently delete?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askConfirm
+      variable: init:Topic.Confirm
+      prompt: "⚠️ Are you sure you want to permanently delete rule `{Topic.RuleId}`? This also deletes all its conditions and role entries. Type **yes** to confirm."
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: ConditionGroup
+      id: checkConfirm
+      conditions:
+        - id: confirmed
+          condition: =Lower(Topic.Confirm) = "yes"
+          actions:
+            - kind: SendActivity
+              id: sendDeleting
+              activity:
+                text:
+                  - "Deleting rule `{Topic.RuleId}` now..."
+
+      elseActions:
+        - kind: SendActivity
+          id: sendCancelled
+          activity:
+            text:
+              - Deletion cancelled. The rule has not been changed.
+        - kind: EndDialog
+          id: endCancelled

@@ -1,0 +1,49 @@
+mcs.metadata:
+  componentName: Register Table
+  description: Registers a new table into the CFE so the form engine can manage it.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Register Table
+    triggerQueries:
+      - register a table
+      - add a table to CFE
+      - onboard a table to the form engine
+      - enable CFE for a table
+      - register new table
+
+  actions:
+    - kind: Question
+      id: askTableName
+      variable: init:Topic.TableName
+      prompt: What is the **logical name** of the table you want to register? (e.g. `account`, `contact`, `opportunity`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askDefaultFieldVis
+      variable: init:Topic.DefaultFieldVis
+      prompt: What should the **default field visibility** be? Reply **hidden** (deny-by-default, recommended) or **visible**.
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askDefaultTabVis
+      variable: init:Topic.DefaultTabVis
+      prompt: What should the **default tab visibility** be? Reply **hidden** or **visible**.
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndCreate
+      activity:
+        text:
+          - "Got it! Registering table **{Topic.TableName}** with default field visibility **{Topic.DefaultFieldVis}** and tab visibility **{Topic.DefaultTabVis}**. Creating the record now..."

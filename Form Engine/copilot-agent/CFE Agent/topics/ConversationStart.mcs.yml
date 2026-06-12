@@ -1,0 +1,23 @@
+mcs.metadata:
+  componentName: Conversation Start
+  description: This system topic triggers when the agent receives an Activity indicating the beginning of a new conversation. If you do not want the agent to initiate the conversation, disable this topic.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnConversationStart
+  id: main
+  actions:
+    - kind: SendActivity
+      id: sendMessage_M0LuhV
+      activity:
+        text:
+          - |
+            👋 Hi! I'm the **CFE Configurator** — your assistant for the Configurable Form Engine.
+
+            I can help you:
+            • 📋 **Register** a table or form into the engine
+            • ✏️ **Create rules** — show/hide fields/tabs/sections, set requirement, editability, default values, or value locks
+            • 🔀 **Add conditions** to rules
+            • 🔐 **Restrict rules by security role**
+            • 📄 **List, enable/disable, or delete** rules for any table
+
+            What would you like to do?

@@ -1,0 +1,77 @@
+mcs.metadata:
+  componentName: Add Condition
+  description: Adds a condition to an existing CFE form rule.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Add Condition
+    triggerQueries:
+      - add a condition to a rule
+      - add condition
+      - make a rule conditional
+      - only apply rule when
+      - set condition on rule
+      - add rule condition
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule you want to add a condition to? (Get it from "list rules for a table".)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askConditionName
+      variable: init:Topic.ConditionName
+      prompt: Give this condition a short **name** (e.g. `Status is Active`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askDriverField
+      variable: init:Topic.DriverField
+      prompt: What is the **logical name of the driver field** whose value will be checked? (e.g. `statuscode`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askOperator
+      variable: init:Topic.Operator
+      prompt: "What **operator**? equals / notequals / contains / notcontains / isempty / isnotempty / in / greaterthan / lessthan"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValue
+      variable: init:Topic.CondValue
+      prompt: What **value** to compare against? (Type **blank** for IsEmpty/IsNotEmpty.)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValueType
+      variable: init:Topic.ValueType
+      prompt: "What **type** is the value? **text**, **number**, **boolean**, **choice**, or **lookup**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndCreate
+      activity:
+        text:
+          - "Adding condition **{Topic.ConditionName}** to rule `{Topic.RuleId}` — when `{Topic.DriverField}` {Topic.Operator} `{Topic.CondValue}`. Creating now..."

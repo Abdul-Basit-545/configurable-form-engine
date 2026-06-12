@@ -1,0 +1,127 @@
+mcs.metadata:
+  componentName: CFE - Assign Role to Rule
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: current
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: mab_formruleroles
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_rolename'
+    description: Display name of the security role e.g. "Sales Manager"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_roleguid'
+    description: Lowercase GUID of the security role without braces
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_ruleid@odata.bind'
+    description: "OData bind path to the parent form rule. Format: /mab_formrules(guid) — look up the GUID with List rows first, then prefix with /mab_formrules( and suffix with )"
+    inputSettings: {}
+
+modelDisplayName: CFE - Assign Role to Rule
+modelDescription: Creates a mab_formrulerole record in the Configurable Form Engine. Use this tool (not the generic Add row) when restricting a rule to a security role. For ruleId supply the OData bind path in format /mab_formrules(guid).
+outputs:
+  - propertyName: mab_formruleroleid
+    name: Role Assignment ID
+    description: Unique identifier for the created role assignment record.
+
+  - propertyName: mab_rolename
+    name: Role Name
+
+  - propertyName: "@odata.id"
+    name: OData Id
+    description: OData row id
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: CreateRecordWithOrganization
+  dynamicInputSchema:
+    properties:
+      entityName:
+        displayName: Table name
+        description: Choose a table
+        nameForModel: create_record_with_organization_entity_name
+        descriptionForModel: "Set this to the entity set name for the Dataverse table in which you are adding the row."
+        isRequired: true
+        order: 1
+        type: String
+
+      item:
+        displayName: Row Item
+        description: Row to create
+        isRequired: true
+        order: 2
+        type:
+          kind: Record
+          properties:
+            mab_roleguid:
+              displayName: Role GUID
+              visibility: Advanced
+              order: 0
+              type: String
+
+            mab_rolename:
+              displayName: Role Name
+              visibility: Advanced
+              order: 1
+              type: String
+
+            mab_ruleid@odata.bind:
+              displayName: Form Rule (Form Rules)
+              visibility: Advanced
+              order: 2
+              type: String
+
+            ownerid@odata.bind:
+              displayName: Owner (Owners)
+              description: Owner Id
+              visibility: Advanced
+              order: 3
+              type: String
+
+      organization:
+        displayName: Environment
+        description: Choose an environment
+        nameForModel: create_record_with_organization_organization
+        descriptionForModel: "Set this to the environment base URL containing the target Dataverse table."
+        isRequired: true
+        order: 0
+        type: String
+
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      mab_formruleroleid:
+        displayName: Role Assignment ID
+        description: Unique identifier for entity instances
+        order: 0
+        type: String
+
+      mab_rolename:
+        displayName: Role Name
+        visibility: Advanced
+        order: 1
+        type: String
+
+      mab_roleguid:
+        displayName: Role GUID
+        visibility: Advanced
+        order: 2
+        type: String
+
+      "@odata.id":
+        displayName: OData Id
+        description: OData row id
+        order: 3
+        type: String
+
+outputMode: All

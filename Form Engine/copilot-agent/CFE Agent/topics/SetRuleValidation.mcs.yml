@@ -1,0 +1,54 @@
+mcs.metadata:
+  componentName: Set Rule Validation
+  description: Adds or updates field validation on an existing CFE form rule.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Set Rule Validation
+    triggerQueries:
+      - add validation to a rule
+      - set validation on a field
+      - validate field input
+      - add email validation
+      - add regex validation
+      - add max length validation
+      - restrict field to numbers only
+      - restrict field to letters only
+      - no future date
+      - no past date
+
+  actions:
+    - kind: Question
+      id: askRuleId
+      variable: init:Topic.RuleId
+      prompt: What is the **Rule ID** (GUID) of the rule to add validation to?
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValType
+      variable: init:Topic.ValType
+      prompt: "What type of validation?\n• **alpha** — letters only\n• **numeric** — numbers only\n• **email** — valid email\n• **nofuturedate** — no future dates\n• **nopastdate** — no past dates\n• **maxlength** — max character count\n• **regex** — custom regex pattern"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askValParam
+      variable: init:Topic.ValParam
+      prompt: "Enter the **parameter** for this validation (max character count for maxlength, regex pattern for regex, or type **none** if not applicable)."
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndUpdate
+      activity:
+        text:
+          - "Setting **{Topic.ValType}** validation on rule `{Topic.RuleId}`{If(Lower(Topic.ValParam) = \"none\", \"\", Concatenate(\" with parameter: \", Topic.ValParam))}. Updating the record..."

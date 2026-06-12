@@ -1,0 +1,58 @@
+mcs.metadata:
+  componentName: Register Form
+  description: Registers a specific form of a managed table so rules can be scoped per form.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Register Form
+    triggerQueries:
+      - register a form
+      - add a form to CFE
+      - scope rules to a specific form
+      - register form for a table
+      - add managed form
+
+  actions:
+    - kind: Question
+      id: askTableName
+      variable: init:Topic.TableName
+      prompt: Which **managed table** does this form belong to? (logical name, e.g. `account`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askFormName
+      variable: init:Topic.FormName
+      prompt: What is the **name** of the form? (e.g. `Account - Main Form`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askFormType
+      variable: init:Topic.FormType
+      prompt: "What type of form? Reply: **main**, **quickcreate**, **quickview**, or **card**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askFormId
+      variable: init:Topic.FormId
+      prompt: "Do you have the **form GUID**? (From make.powerapps.com > Tables > Forms > open form > copy ID from URL.) Type **skip** to leave blank."
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndCreate
+      activity:
+        text:
+          - "Got it! Registering form **{Topic.FormName}** ({Topic.FormType}) under table **{Topic.TableName}**. Creating the record now..."

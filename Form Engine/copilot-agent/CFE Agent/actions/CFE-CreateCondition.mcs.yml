@@ -1,0 +1,183 @@
+mcs.metadata:
+  componentName: CFE - Create Rule Condition
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: current
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: mab_formruleconditions
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_name'
+    description: Condition name e.g. "Status is Active"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_driverfield'
+    description: Logical name of the field whose value is checked e.g. sysai_status
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_operator'
+    description: "Choice: Equals=734000000, NotEquals=734000001, Contains=734000002, NotContains=734000003, IsEmpty=734000004, IsNotEmpty=734000005, In=734000006, GreaterThan=734000007, LessThan=734000008"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_value'
+    description: Value to compare against (leave blank for IsEmpty/IsNotEmpty)
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_valuetype'
+    description: "Choice: Text=734000000, Number=734000001, Boolean=734000002, Choice=734000003, Lookup=734000004"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_sequence'
+    description: Integer — ordering of this condition within the rule
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_formruleid@odata.bind'
+    description: "OData bind path to the parent form rule. Format: /mab_formrules(guid) — look up the GUID with List rows first, then prefix with /mab_formrules( and suffix with )"
+    inputSettings: {}
+
+modelDisplayName: CFE - Create Rule Condition
+modelDescription: Creates a mab_formrulecondition record in the Configurable Form Engine. Use this tool (not the generic Add row) when adding a condition to a rule. For formRuleId supply the OData bind path in format /mab_formrules(guid).
+outputs:
+  - propertyName: mab_formruleconditionid
+    name: Condition ID
+    description: Unique identifier for the created condition record.
+
+  - propertyName: mab_name
+    name: Condition Name
+
+  - propertyName: "@odata.id"
+    name: OData Id
+    description: OData row id
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: CreateRecordWithOrganization
+  dynamicInputSchema:
+    properties:
+      entityName:
+        displayName: Table name
+        description: Choose a table
+        nameForModel: create_record_with_organization_entity_name
+        descriptionForModel: "Set this to the entity set name for the Dataverse table in which you are adding the row."
+        isRequired: true
+        order: 1
+        type: String
+
+      item:
+        displayName: Row Item
+        description: Row to create
+        isRequired: true
+        order: 2
+        type:
+          kind: Record
+          properties:
+            mab_driverfield:
+              displayName: Driver Field
+              visibility: Advanced
+              order: 0
+              type: String
+
+            mab_formruleid@odata.bind:
+              displayName: Form Rule (Form Rules)
+              visibility: Advanced
+              order: 1
+              type: String
+
+            mab_name:
+              displayName: Condition Name
+              visibility: Advanced
+              order: 2
+              type: String
+
+            mab_operator:
+              displayName: Operator
+              visibility: Advanced
+              order: 3
+              dynamicValuesConfig:
+                capability: List
+              type: Number
+
+            mab_sequence:
+              displayName: Sequence
+              visibility: Advanced
+              order: 4
+              type: Number
+
+            mab_value:
+              displayName: Value
+              visibility: Advanced
+              order: 5
+              type: String
+
+            mab_valuetype:
+              displayName: Value Type
+              visibility: Advanced
+              order: 6
+              dynamicValuesConfig:
+                capability: List
+              type: Number
+
+            ownerid@odata.bind:
+              displayName: Owner (Owners)
+              description: Owner Id
+              visibility: Advanced
+              order: 7
+              type: String
+
+      organization:
+        displayName: Environment
+        description: Choose an environment
+        nameForModel: create_record_with_organization_organization
+        descriptionForModel: "Set this to the environment base URL containing the target Dataverse table."
+        isRequired: true
+        order: 0
+        type: String
+
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      mab_formruleconditionid:
+        displayName: Condition ID
+        description: Unique identifier for entity instances
+        order: 0
+        type: String
+
+      mab_name:
+        displayName: Condition Name
+        visibility: Advanced
+        order: 1
+        type: String
+
+      mab_driverfield:
+        displayName: Driver Field
+        visibility: Advanced
+        order: 2
+        type: String
+
+      mab_operator:
+        displayName: Operator
+        visibility: Advanced
+        order: 3
+        type: Number
+
+      mab_value:
+        displayName: Value
+        visibility: Advanced
+        order: 4
+        type: String
+
+      "@odata.id":
+        displayName: OData Id
+        description: OData row id
+        order: 5
+        type: String
+
+outputMode: All

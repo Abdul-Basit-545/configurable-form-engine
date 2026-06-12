@@ -1,0 +1,183 @@
+mcs.metadata:
+  componentName: CFE - Create Managed Form
+kind: TaskDialog
+inputs:
+  - kind: ManualTaskInput
+    propertyName: organization
+    value: current
+
+  - kind: ManualTaskInput
+    propertyName: entityName
+    value: mab_managedforms
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_name'
+    description: Form display name e.g. "Information"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_formtype'
+    description: "Choice: Main=734000000, QuickCreate=734000001, QuickView=734000002, Card=734000003"
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_formid'
+    description: The form GUID from make.powerapps.com (plain GUID, no braces)
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_enabled'
+    description: Boolean — true to enable this form scope
+
+  - kind: AutomaticTaskInput
+    propertyName: item.'mab_managedtableid@odata.bind'
+    description: "OData bind path to the parent managed table. Format: /mab_managedtables(guid) — look up the GUID with List rows first, then prefix with /mab_managedtables( and suffix with )"
+    inputSettings: {}
+
+modelDisplayName: CFE - Create Managed Form
+modelDescription: Creates a mab_managedform record in the Configurable Form Engine. Use this tool (not the generic Add row) when registering a form. For managedTableId supply the OData bind path in format /mab_managedtables(guid).
+outputs:
+  - propertyName: mab_managedformid
+    name: Managed Form ID
+    description: Unique identifier for the created managed form record.
+
+  - propertyName: mab_name
+    name: Form Name
+
+  - propertyName: "@odata.id"
+    name: OData Id
+    description: OData row id
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: CreateRecordWithOrganization
+  dynamicInputSchema:
+    properties:
+      entityName:
+        displayName: Table name
+        description: Choose a table
+        nameForModel: create_record_with_organization_entity_name
+        descriptionForModel: "Set this to the entity set name for the Dataverse table in which you are adding the row."
+        isRequired: true
+        order: 1
+        type: String
+
+      item:
+        displayName: Row Item
+        description: Row to create
+        isRequired: true
+        order: 2
+        type:
+          kind: Record
+          properties:
+            mab_defaultfieldvisibility:
+              displayName: Default Field Visibility
+              visibility: Advanced
+              order: 0
+              dynamicValuesConfig:
+                capability: List
+              type: Number
+
+            mab_defaulttabvisibility:
+              displayName: Default Tab Visibility
+              visibility: Advanced
+              order: 1
+              dynamicValuesConfig:
+                capability: List
+              type: Number
+
+            mab_enabled:
+              displayName: Enabled
+              visibility: Advanced
+              order: 2
+              type: Boolean
+
+            mab_formid:
+              displayName: Form ID
+              visibility: Advanced
+              order: 3
+              type: String
+
+            mab_formtype:
+              displayName: Form Type
+              visibility: Advanced
+              order: 4
+              dynamicValuesConfig:
+                capability: List
+              type: Number
+
+            mab_managedtableid@odata.bind:
+              displayName: Managed Table (Managed Tables)
+              visibility: Advanced
+              order: 5
+              type: String
+
+            mab_name:
+              displayName: Form Name
+              visibility: Advanced
+              order: 6
+              type: String
+
+            ownerid@odata.bind:
+              displayName: Owner (Owners)
+              description: Owner Id
+              visibility: Advanced
+              order: 7
+              type: String
+
+      organization:
+        displayName: Environment
+        description: Choose an environment
+        nameForModel: create_record_with_organization_organization
+        descriptionForModel: "Set this to the environment base URL containing the target Dataverse table."
+        isRequired: true
+        order: 0
+        type: String
+
+  dynamicOutputSchema:
+    kind: Record
+    properties:
+      mab_managedformid:
+        displayName: Managed Form ID
+        description: Unique identifier for entity instances
+        order: 0
+        type: String
+
+      mab_name:
+        displayName: Form Name
+        visibility: Advanced
+        order: 1
+        type: String
+
+      mab_formid:
+        displayName: Form ID
+        visibility: Advanced
+        order: 2
+        type: String
+
+      mab_formtype:
+        displayName: Form Type
+        visibility: Advanced
+        order: 3
+        type: Number
+
+      mab_enabled:
+        displayName: Enabled
+        visibility: Advanced
+        order: 4
+        type: Boolean
+
+      _mab_managedtableid_value:
+        displayName: Managed Table (Value)
+        visibility: Advanced
+        order: 5
+        type: String
+
+      "@odata.id":
+        displayName: OData Id
+        description: OData row id
+        order: 6
+        type: String
+
+outputMode: All

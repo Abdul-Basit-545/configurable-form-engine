@@ -1,0 +1,17 @@
+mcs.metadata:
+  componentName: Microsoft Dataverse - Delete a row from selected environment
+kind: TaskDialog
+modelDisplayName: Delete a row from selected environment
+modelDescription: Delete a row from a table in a Power Platform environment.
+outputs:
+  - propertyName: Response
+
+action:
+  kind: InvokeConnectorTaskAction
+  connectionReference: mab_CFEAgent.shared_commondataserviceforapps.a0ac2eff6ed9427c970a6e4af7fa277c
+  connectionProperties:
+    mode: Invoker
+
+  operationId: DeleteRecordWithOrganization
+
+outputMode: All

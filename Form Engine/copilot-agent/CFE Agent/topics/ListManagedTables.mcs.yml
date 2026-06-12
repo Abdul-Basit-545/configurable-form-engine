@@ -1,0 +1,22 @@
+mcs.metadata:
+  componentName: List Managed Tables
+  description: Lists all tables currently registered in the CFE.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: List Managed Tables
+    triggerQueries:
+      - list managed tables
+      - show registered tables
+      - which tables are in CFE
+      - what tables are managed
+      - show all CFE tables
+
+  actions:
+    - kind: SendActivity
+      id: fetching
+      activity:
+        text:
+          - Fetching all registered CFE tables...

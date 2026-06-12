@@ -1,0 +1,108 @@
+mcs.metadata:
+  componentName: Create Rule
+  description: Guided wizard to create a CFE form rule — visibility, requirement, editability, default value, value lock, or form-level lock.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    displayName: Create Rule
+    triggerQueries:
+      - create a rule
+      - add a form rule
+      - hide a field
+      - show a field
+      - make a field required
+      - make a field optional
+      - lock a field
+      - create a CFE rule
+      - lock the form
+      - set editability on a field
+
+  actions:
+    - kind: Question
+      id: askTableName
+      variable: init:Topic.TableName
+      prompt: Which **table** is this rule for? (logical name, e.g. `account`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askRuleName
+      variable: init:Topic.RuleName
+      prompt: Give this rule a short **name** (e.g. `Hide Credit Limit on Create`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askElementType
+      variable: init:Topic.ElementType
+      prompt: "What type of element?\n• **field** — a single field\n• **tab** — a whole tab\n• **section** — a form section\n• **form** — the entire form (lock/unlock all)"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askElementName
+      variable: init:Topic.ElementName
+      prompt: What is the **logical name** of the {Topic.ElementType}? (e.g. `creditlimit`, `tab_financial`, `section_details`)
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askVisibility
+      variable: init:Topic.Visibility
+      prompt: "Set **visibility**: **show**, **hide**, or **nochange**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askRequirement
+      variable: init:Topic.Requirement
+      prompt: "Set **requirement**: **required**, **optional**, or **nochange**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askEditability
+      variable: init:Topic.Editability
+      prompt: "Set **editability**: **editable**, **readonly**, or **nochange**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askAppliesOn
+      variable: init:Topic.AppliesOn
+      prompt: "When should this apply? **create**, **update**, or **both**"
+      entity: StringPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: Question
+      id: askPriority
+      variable: init:Topic.Priority
+      prompt: Set a **priority** (integer, lower fires first, e.g. `10`). Type `0` for default.
+      entity: NumberPrebuiltEntity
+      alwaysPrompt: true
+      interruptionPolicy:
+        allowInterruption: true
+
+    - kind: SendActivity
+      id: confirmAndCreate
+      activity:
+        text:
+          - "Creating rule **{Topic.RuleName}** for table **{Topic.TableName}** — {Topic.ElementType} `{Topic.ElementName}` | visibility: {Topic.Visibility} | requirement: {Topic.Requirement} | editability: {Topic.Editability} | applies on: {Topic.AppliesOn} | priority: {Topic.Priority}. One moment..."
